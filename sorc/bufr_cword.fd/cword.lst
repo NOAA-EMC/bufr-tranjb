@@ -1,0 +1,446 @@
+Page 1           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+      1 C$$$  MAIN PROGRAM DOCUMENTATION BLOCK
+      2 C  
+      3 C MAIN PROGRAM:  BUFR_CWORD
+      4 C   PRGMMR: KEYSER           ORG: NP22        DATE: 2014-01-16
+      5 C
+      6 C ABSTRACT: CONVERTS BINARY BYTE STREAM BUFR FILES BACK AND FORTH
+      7 C   FROM A FORTRAN BLOCKED FORMAT. THE INPUT FILE MAY EITHER BE BLOCKED
+      8 C   OR UNBLOCKED, HOWEVER NORMALLY THE INPUT FILE IS UNBLOCKED WHEN
+      9 C   BLOCKING IS PERFORMED HERE AND THE INPUT FILE IS BLOCKED WHEN
+     10 C   UNBLOCKING IS PERFORMED HERE. CAN OPTIONALLY REMOVE THE DICTIONARY
+     11 C   MESSAGES FROM AN UNPUT FILE WHEN EITHER BLOCKING OR UNBLOCKING IT.
+     12 C
+     13 C PROGRAM HISTORY LOG:
+     14 C 1999-08-19  J. WOOLLEN  ORIGINAL VERSION FOR IMPLEMENTATION
+     15 C 2004-03-19  D. KEYSER   INCREASED SIZE OF ARRAY MBAY FROM 3000 WORDS
+     16 C                         TO 5000 WORDS TO ALLOW IT TO PROCESS BUFR
+     17 C                         MESSAGES WITH UP TO 20K BYTES
+     18 C 2005-11-29  J. ATOR     REWRITTEN USING BUFRLIB C I/O LOGIC TO HANDLE
+     19 C                         ANY INPUT BUFR FILES (INCLUDING FILES WHICH
+     20 C                         CONTAIN EXTRANEOUS CHARACTERS (E.G. BULLETIN
+     21 C                         HEADERS) AND/OR WHICH PREVIOUSLY REQUIRED THE
+     22 C                         USE OF APPLICATION PROGRAM GRABBUFR) AND TO
+     23 C                         REMOVE DIRECT LINKS TO BUFRLIB COMMON BLOCKS
+     24 C 2007-11-28  D. KEYSER   INCREASED LIMIT FOR I/O FILENAME LENGTH FROM
+     25 C                         80 CHARACTERS TO 120 CHARACTERS
+     26 C 2011-01-05  D. KEYSER   INCREASED SIZE OF ARRAY MBAY FROM 37500
+     27 C                         4-BYTE WORDS TO 625000 4-BYTE WORDS TO ALLOW
+     28 C                         IT TO PROCESS BUFR MESSAGES WITH UP TO
+     29 C                         2.5 MBYTES (INSTEAD OF UP TO JUST 150K
+     30 C                         BYTES); NOW PRINTS DIAGNOSTICS IF EITHER NO
+     31 C                         INPUT MESSAGES WERE PROCESSED OR IF ONE OR
+     32 C                         MORE INPUT MESSAGES WERE NOT PROCESSED (FOR
+     33 C                         WHATEVER REASON); NOW LOOKS FOR SCRIPT
+     34 C                         ENVIRONMENT VARIABLE "DX_SKIP" VIA CALL TO
+     35 C                         GETENV, IF "YES" OR "yes" WILL NOT COPY BUFR
+     36 C                         DICTIONARY (TABLE) MESSAGES TO OUTPUT WHEN
+     37 C                         BLOCKING (BEFORE DICTIONARY MESSAGES WERE
+     38 C                         ALWAYS COPIED) (DOES NOT APPLY TO UNBLOCKING,
+     39 C                         DICTIONARY MESSAGES WILL CONTINUE TO BE
+     40 C                         COPIED IN THIS CASE), THE DEFAULT (WHEN
+     41 C                         "DX_SKIP" IS NOT FOUND) IS TO COPY DICTIONARY
+     42 C                         MESSAGES WHEN BLOCKING (AS BEFORE)
+     43 C 2012-10-13  D. KEYSER   CHANGES TO RUN ON WCOSS.  SCRIPT ENVIRONMENT
+     44 C                         VARIABLE "DX_SKIP" WILL NOW WORK FOR
+     45 C                         UNBLOCKING AS WELL AS FOR BLOCKING.
+     46 C 2014-01-16  D. KEYSER   INCREASED LIMIT FOR I/O FILENAME LENGTH FROM
+     47 C                         120 CHARACTERS TO 500 CHARACTERS. RENAMED
+     48 C                         FROM CWORDSH TO BUFR_CWORD.
+     49 C
+     50 C USAGE:
+     51 C   INPUT FILES:
+     52 C     UNIT 05  - STANDARD INPUT (OPERATION TYPE, INPUT FILENAME,
+     53 C                OUTPUT FILENAME)
+     54 C
+     55 C   OUTPUT FILES: 
+     56 C     UNIT 06  - STANDARD OUTPUT PRINT
+     57 C     UNIT 51  - BLOCKED FORTRAN FILE OUTPUT FOR BLOCKING OPERATION
+
+Page 2           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+     58 C
+     59 C   SUBPROGRAMS CALLED:
+     60 C     LIBRARY:
+     61 C     SYSTEM:    - GET_ENVIRONMENT_VARIABLE
+     62 C       W3NCO    - W3TAGB   W3TAGE   ERREXIT
+     63 C       BUFRLIB  - CCBFL    COBFL    CRBMG    CWBMG    PADMSG
+     64 C                  IUPBS01
+     65 C
+     66 C   EXIT STATES:
+     67 C     COND =   0 - SUCCESSFUL RUN
+     68 C          =   8 - INCORRECT INPUT PARAMETER, NO OUTPUT FILE CREATED
+     69 C
+     70 C REMARKS: ONE SCRIPT ENVIRONMENT VARIABLE IS READ IN:
+     71 C            DX_SKIP         - If = 'YES' or 'yes', then only non-
+     72 C                              dictionary (i.e., non-table) BUFR
+     73 C                              messages read in will be copied to
+     74 C                              output when blocking or unblocking
+     75 C                              (i.e., dictionary messages will not be
+     76 C                              copied when blocking or unblocking).
+     77 C                            - Otherwise (including if DX_SKIP is not
+     78 C                              set), all BUFR messages read in
+     79 C                              (including BUFR dictionary messages)
+     80 C                              will be copied to output when blocking
+     81 C                              or unblocking -- this is the default
+     82 C
+     83 C
+     84 C ATTRIBUTES:
+     85 C   LANGUAGE: FORTRAN 90
+     86 C   MACHINE:  NCEP WCOSS
+     87 C
+     88 C$$$
+     89 
+     90       program bufr_cword
+     91 
+     92       parameter(mxbufr=2500000)
+     93       parameter(mxbufrd4=mxbufr/4)
+     94 
+     95       character*500 bfile,ufile
+     96       character*8  cword
+     97       character*3  dx_skip,dx_skip_ORIG
+     98       character*1  bufr(mxbufr)
+     99       dimension    mbay(mxbufrd4)
+    100       equivalence  (bufr(1),mbay(1))
+    101 
+    102       call w3tagb('BUFR_CWORD',2014,0016,0332,'NP22')
+    103  
+    104       istop = 0
+    105       igo   = 5
+    106 
+    107 c     Read and process the input arguments.
+    108  
+    109       call get_environment_variable('DX_SKIP',dx_skip)
+    110       dx_skip_ORIG = dx_skip
+    111       if(dx_skip_ORIG.EQ.'   ')  dx_skip = 'NO'
+    112  
+    113       read(5,'(a)') cword
+    114       if(cword.eq.'block') then
+
+Page 3           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+    115          read(5,'(a)') ufile
+    116          read(5,'(a)') bfile
+    117       elseif(cword.eq.'unblk') then
+    118          read(5,'(a)') bfile
+    119          read(5,'(a)') ufile
+    120       else
+    121          print *,'cword must be block or unblk'
+    122          call w3tage('BUFR_CWORD')
+    123          call errexit(8)
+    124       endif
+    125  
+    126 c     Open the input and output files.
+    127 
+    128       if(cword.eq.'block') then
+    129          print '(" blocking from: ",A)', trim(ufile)
+    130          print '("            to: ",A)', trim(bfile)
+    131          call cobfl(ufile,'r')
+    132          open(51,file=bfile,form='unformatted')
+    133       else
+    134          print '(" unblocking from: ",A)', trim(bfile)
+    135          print '("              to: ",A)', trim(ufile)
+    136          call cobfl(bfile,'r')
+    137          call cobfl(ufile,'w')
+    138       endif
+    139 
+    140 c     Read the next message from the input file.
+    141 
+    142       call crbmg(bufr,mxbufr,nbyt,ierr)
+    143       if(ierr.eq.-1) then
+    144          print '(" Return value from crbmg is -1 on first BUFR message",
+    145      .    " read; input file is empty; no output file created.")'
+    146          go to 88
+    147       elseif(ierr.lt.-1) then
+    148          print '(" Return value from crbmg is -2 on first BUFR message",
+    149      .    " read; I/O error reading first input BUFR message; no ",
+    150      .    "output file created.")'
+    151          go to 88
+    152       endif
+    153 
+    154       do while(ierr.ge.0)
+    155          if(ierr.eq.0) then
+    156 
+    157 c         Pad the end of the message with zeroed-out bytes up to the
+    158 c         next 8-byte boundary.
+    159 
+    160             call padmsg(mbay,mxbufrd4,npbyt)
+    161             ntbyt = nbyt + npbyt
+    162 
+    163 c         Write the message plus padding to the output file...
+    164 
+    165             if(cword.eq.'block') then
+    166 
+    167 c           using a FORTRAN write (check value of dx_skip to see if
+    168 c            dictionary messages should be skipped in write).
+    169 
+    170                if(iupbs01(mbay,'MTYP').eq.11 .and.
+    171      .            (dx_skip.eq.'YES' .or. dx_skip.eq.'yes')) then
+
+Page 4           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+    172                   print '(" BUFR dictionary (table) message read; ",
+    173      .             "message not written to output because DX_SKIP is ",
+    174      .             "set to ""YES"" or ""yes"".")'
+    175                else
+    176                   write(51) (bufr(i),i=1,ntbyt)
+    177                   igo = 0
+    178                endif
+    179 
+    180             else
+    181 
+    182 c           using a C write.
+    183 
+    184                if(iupbs01(mbay,'MTYP').eq.11 .and.
+    185      .            (dx_skip.eq.'YES' .or. dx_skip.eq.'yes')) then
+    186                   print '(" BUFR dictionary (table) message read; ",
+    187      .             "message not written to output because DX_SKIP is ",
+    188      .             "set to ""YES"" or ""yes"".")'
+    189                else
+    190                   call cwbmg(bufr,ntbyt,ierw)
+    191                   if(ierw.ne.0) then
+    192                   print '(" return value from cwbmg is ",I0," - I/O ",
+    193      .             "error occurred while writing; message not written ",
+    194      .             "to output")', ierw
+    195                      istop = 4
+    196                   else
+    197                      igo = 0
+    198                   endif
+    199                endif
+    200             endif
+    201          else
+    202             if(ierr.eq.1) then
+    203                print '(" return value from crbmg is 1 - BUFR message ",
+    204      .          "array overflow, increase size of array; message not ",
+    205      .          "written to output")'
+    206             elseif(ierr.eq.2) then
+    207                print '(" return value from crbmg is 2 -""7777"" ",
+    208      .          "indicator not found in expected location; message not",
+    209      .          " written to output")'
+    210             else
+    211                print '(" return value from crbmg is ",I0,"; message ",
+    212      .          "not written to output")', ierr
+    213             endif
+    214             istop = 4
+    215          endif
+    216          call crbmg(bufr,mxbufr,nbyt,ierr)
+    217       enddo
+    218       if(ierr.eq.-1) then
+    219          print *,'done'
+    220       elseif(ierr.lt.-1) then
+    221          print '(" return value from crbmg is -2 - I/O error reading ",
+    222      .    "input message; message not written to output")'
+    223          istop = 4
+    224       endif
+    225 
+    226 c     Close the input and output files.
+    227 
+    228       call ccbfl
+
+Page 5           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+    229       if(cword.eq.'block') close(51)
+    230  
+    231    88 continue
+    232 
+    233       if(cword.eq.'block') then
+    234          if(igo.eq.5) then
+    235             print '(" ***WARNING: BUFR_CWORD - No input BUFR messages ",
+    236      .       "were blocked into output file - no output file created")'
+    237          else if(istop.eq.4) then
+    238             print '(" ***WARNING: BUFR_CWORD - One or more input BUFR ",
+    239      .       "messages could not be blocked into output file - output ",
+    240      .       "file is incomplete")'
+    241          endif
+    242       else
+    243          if(igo.eq.5) then
+    244             print '(" ***WARNING: BUFR_CWORD - No input BUFR messages",
+    245      .       " were unblocked into output file - no output file ",
+    246      .       "created")'
+    247          else if(istop.eq.4) then
+    248             print '(" ***WARNING: BUFR_CWORD - One or more input BUFR",
+    249      .       " messages could not be unblocked into output file - ",
+    250      .       "output file is incomplete")'
+    251          endif
+    252       endif
+    253 
+    254       call w3tage('BUFR_CWORD')
+    255 
+    256       stop
+    257 
+    258       end
+
+Page 6           Source Listing                  BUFR_CWORD
+2021-09-30 04:35 Entry Points                    cword.f
+
+
+
+ENTRY POINTS
+
+  Name              
+                    
+ MAIN__             
+
+
+SYMBOL CROSS REFERENCE
+
+ Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
+                                                                                                                                    
+ 88                         Label  231                                                            146,151                           
+ BFILE                      Local  95       CHAR            500         scalar                    116,118,130,132,134,136           
+ BUFR                       Local  98       CHAR            1     1     2500000                   142,176,190,216                   
+ BUFR_CWORD                 Prog   90                                                                                               
+ CCBFL                      Subr   228                                                            228                               
+ COBFL                      Subr   131                                                            131,136,137                       
+ CRBMG                      Subr   142                                                            142,216                           
+ CWBMG                      Subr   190                                                            190                               
+ CWORD                      Local  96       CHAR            8           scalar                    113,114,117,128,165,229,233       
+ DX_SKIP                    Local  97       CHAR            3           scalar                    109,110,111,171,185               
+ DX_SKIP_ORIG               Local  97       CHAR            3           scalar                    110,111                           
+ ERREXIT                    Subr   123                                                            123                               
+ GET_ENVIRONMENT_VARIABLE   Intrin 109                                                            109                               
+ I                          Local  176      I(4)            4           scalar                    176                               
+ IERR                       Local  142      I(4)            4           scalar                    142,143,147,154,155,202,206,212,21
+                                                                                                  6,218,220                         
+ IERW                       Local  190      I(4)            4           scalar                    190,191,194                       
+ IGO                        Local  105      I(4)            4           scalar                    105,177,197,234,243               
+ ISTOP                      Local  104      I(4)            4           scalar                    104,195,214,223,237,247           
+ IUPBS01                    Func   170      I(4)            4           scalar                    170,184                           
+ MBAY                       Local  99       I(4)            4     1     625000                    160,170,184                       
+ MXBUFR                     Param  92       I(4)            4           scalar                    93,98,142,216                     
+ MXBUFRD4                   Param  93       I(4)            4           scalar                    99,160                            
+ NBYT                       Local  142      I(4)            4           scalar                    142,161,216                       
+ NPBYT                      Local  160      I(4)            4           scalar                    160,161                           
+ NTBYT                      Local  161      I(4)            4           scalar                    161,176,190                       
+ PADMSG                     Subr   160                                                            160                               
+ TRIM                       Func   129                                  scalar                    129,130,134,135                   
+ UFILE                      Local  95       CHAR            500         scalar                    115,119,129,131,135,137           
+ W3TAGB                     Subr   102                                                            102                               
+ W3TAGE                     Subr   122                                                            122,254                           
+
+Page 7           Source Listing                  BUFR_CWORD
+2021-09-30 04:35 Subprograms/Common Blocks       cword.f
+
+
+
+SUBPROGRAMS/COMMON BLOCKS
+
+ Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
+                                                                                                                                    
+ BUFR_CWORD                 Prog   90                                                                                               
+
+COMPILER OPTIONS BEING USED
+
+       -align noall                          -align nonone
+       -align nocommons                      -align nodcommons
+       -align noqcommons                     -align nozcommons
+       -align records                        -align nosequence
+       -align norec1byte                     -align norec2byte
+       -align norec4byte                     -align norec8byte
+       -align norec16byte                    -align norec32byte
+       -align norec64byte                    -align noarray8byte
+       -align noarray16byte                  -align noarray32byte
+       -align noarray64byte                  -align noarray128byte
+       -align noarray256byte                 -altparam
+       -assume accuracy_sensitive            -assume nobscc
+       -assume nobuffered_io                 -assume nobuffered_stdout
+       -assume nobyterecl                    -assume nocontiguous_assumed_shape
+       -assume nocontiguous_pointer          -assume nocc_omp
+       -assume nocstring                     -assume nodummy_aliases
+       -assume nofpe_summary                 -assume noieee_fpe_flags
+       -assume nominus0                      -assume noold_boz
+       -assume old_complex_align             -assume old_unit_star
+       -assume old_inquire_recl              -assume noold_ldout_format
+       -assume old_ldout_zero                -assume noold_logical_assign
+       -assume noold_logical_ldio            -assume old_maxminloc
+       -assume old_xor                       -assume noprotect_allocates
+       -assume protect_constants             -assume noprotect_parens
+       -assume split_common                  -assume source_include
+       -assume nostd_intent_in               -assume std_minus0_rounding
+       -assume nostd_mod_proc_name           -assume std_value
+       -assume realloc_lhs                   -assume underscore
+       -assume no2underscores                -assume norecursion
+  no   -auto                                 -auto_scalar
+  no   -bintext                              -ccdefault default
+       -check noarg_temp_created             -check noassume
+       -check nobounds                       -check nocontiguous
+       -check noformat                       -check nooutput_conversion
+       -check nooverflow                     -check nopointers
+       -check noshape                        -check nostack
+       -check nouninitialized                -check noudio_iostat
+       -coarray-num-procs 0             no   -coarray-config-file
+       -convert native                       -cross_reference
+       -D __INTEL_COMPILER=1910              -D __INTEL_COMPILER_UPDATE=3
+       -D __unix__                           -D __unix
+       -D __linux__                          -D __linux
+       -D __gnu_linux__                      -D unix
+       -D linux                              -D __ELF__
+       -D __x86_64                           -D __x86_64__
+       -D __amd64                            -D __amd64__
+       -D __INTEL_COMPILER_BUILD_DATE=20200925       -D __INTEL_OFFLOAD
+
+Page 8           Source Listing                  BUFR_CWORD
+2021-09-30 04:35                                 cword.f
+
+       -D __MMX__                            -D __SSE__
+       -D __SSE_MATH__                       -D __SSE2__
+       -D __SSE2_MATH__                      -D __pentium4
+       -D __pentium4__                       -D __tune_pentium4__
+       -double_size 64                  no   -d_lines
+  no   -Qdyncom                              -error_limit 30
+  no   -f66                             no   -f77rtl
+  no   -fast                                 -fpscomp nofilesfromcmd
+       -fpscomp nogeneral                    -fpscomp noioformat
+       -fpscomp noldio_spacing               -fpscomp nologicals
+       -fixed                           no   -fpconstant
+       -fpe3                                 -fprm nearest
+  no   -ftz                                  -fp_model noprecise
+       -fp_model fast                        -fp_model nostrict
+       -fp_model nosource                    -fp_model nodouble
+       -fp_model noextended                  -fp_model novery_fast
+       -fp_model noexcept                    -fp_model nono_except
+       -heap_arrays 0                   no   -threadprivate_compat
+       -g0                                   -iface nomixed_str_len_arg
+       -iface nono_mixed_str_len_arg         -init noarrays
+       -init nohuge                          -init noinfinity
+       -init nominus_huge                    -init nominus_infinity
+       -init nominus_tiny                    -init nonan
+       -init nosnan                          -init notiny
+       -init nozero                     no   -intconstant
+       -integer_size 32                 no   -mixed_str_len_arg
+  no   -module                               -names lowercase
+  no   -noinclude                       no   -o
+       -offload-build=host                   -openmp-simd
+       -O3                              no   -pad_source
+       -real_size 32                    no   -recursive
+       -reentrancy threaded                  -vec=simd
+       -show nofullpath                      -show noinclude
+       -show map                             -show options
+  no   -syntax_only                     no   -threadcom
+  no   -U                               no   -vms
+       -w noall                              -w nonone
+       -w alignments                         -w nodeclarations
+       -w noexternals                        -w general
+       -w noignore_bounds                    -w noignore_loc
+       -w nointerfaces                       -w noshape
+       -w notruncated_source                 -w uncalled
+       -w uninitialized                      -w nounused
+       -w usage                         no   -wrap-margins
+
+       -includepath : /pe/intel/compilers_and_libraries_2020.4.304/linux/pstl/stdlib/,/usr/lib64/gcc/x86_64-suse-linux/7/include/,
+           .f,./.f,/pe/intel/compilers_and_libraries_2020.4.304/linux/ipp/include/.f,/pe/intel/compilers_and_libraries_2020.4.304/linux/mkl/include/.f,
+           /pe/intel/compilers_and_libraries_2020.4.304/linux/pstl/include/.f,/pe/intel/compilers_and_libraries_2020.4.304/linux/pstl/stdlib/.f,
+           /pe/intel/compilers_and_libraries_2020.4.304/linux/tbb/include/.f,/pe/intel/compilers_and_libraries_2020.4.304/linux/compiler/include/intel64/.f,
+           /pe/intel/compilers_and_libraries_2020.4.304/linux/compiler/include/icc/.f,/pe/intel/compilers_and_libraries_2020.4.304/linux/compiler/include/.f,
+           /usr/lib64/gcc/x86_64-suse-linux/7/include/.f,/usr/lib64/gcc/x86_64-suse-linux/7/include-fixed/.f,/usr/include/.f,
+           /usr/include/.f,/usr/include/.f
+       -list filename : cword.lst
+  no   -o
+
+COMPILER: Intel(R) Fortran 19.1-1655
