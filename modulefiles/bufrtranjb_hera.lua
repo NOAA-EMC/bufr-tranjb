@@ -8,16 +8,16 @@ local pkgNameVer = myModuleFullName()
 
 conflict(pkgName)
 
-module load cmake/3.20.1
+load("cmake/3.20.1")
 
-module use /scratch2/NCEPDEV/nwprod/hpc-stack/libs/hpc-stack/modulefiles/stack
-module load hpc/1.1.0
-module load hpc-intel/18.0.5.274
+prepend_path("/scratch2/NCEPDEV/nwprod/hpc-stack/libs/hpc-stack/modulefiles/stack")
+load("hpc/1.1.0")
+load("hpc-intel/18.0.5.274")
 
-# Load common modules for this package
+-- Load common modules for this package
 load("bufrtranjb_common")
 
-setenv("FC" "ifort")
+setenv("FC", "ifort")
 
 whatis("Name: ".. pkgName)
 whatis("Version: ".. pkgVersion)

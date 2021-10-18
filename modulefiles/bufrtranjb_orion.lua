@@ -1,5 +1,5 @@
 help([[
-Load environment for running bufr-tranjb on WCOSS2
+Load environment for running bufr-tranjb on Orion
 ]])
 
 local pkgName    = myModuleName()
@@ -8,16 +8,16 @@ local pkgNameVer = myModuleFullName()
 
 conflict(pkgName)
 
-intel_ver=os.getenv("intel_ver") or "default"
+load("cmake/3.18.1")
 
-load("envvar")
-load("PrgEnv-intel")
-load(pathJoin("intel", intel_ver))
+prepend_path("/apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack")
+load("hpc/1.1.0")
+load("hpc-intel/2018.4")
 
-# Load common modules for this package
+-- Load common modules for this package
 load("bufrtranjb_common")
 
-setenv("FC" "ftn")
+setenv("FC", "ifort")
 
 whatis("Name: ".. pkgName)
 whatis("Version: ".. pkgVersion)
