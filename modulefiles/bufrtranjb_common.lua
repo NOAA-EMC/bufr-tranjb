@@ -1,5 +1,5 @@
 help([[
-Load common modules bufr-tranjb on all machines
+Load common modules to build bufr-tranjb on all machines
 ]])
 
 bacio_ver=os.getenv("bacio_ver") or "default"

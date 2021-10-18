@@ -30,13 +30,16 @@ if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   # WCOSS2 likes to call the bin/ directory exec/
   if [[ "$target" =~ ^(wcoss2)$ ]]; then
     CMAKE_OPTS+=" -DCMAKE_INSTALL_BINDIR=exec"
+    # Needs bugfix in nceplibs-bufr develop that is not in 11.5.0
+    export bufr_ROOT=/lfs/h2/emc/eib/noscrub/Rahul.Mahajan/tmp_stack/nceplibs-bufr/install
+    # Needs w3emc 2.9.1 that eliminates w3nco dependency
+    export w3emc_ROOT=/lfs/h2/emc/eib/noscrub/Rahul.Mahajan/tmp_stack/nceplibs-w3emc/install
   fi
 fi
 
 # Determine install path.
 INSTALL_PREFIX=${INSTALL_PREFIX:-$pkg_root/install}
 
-  exit
 # Create a build directory and cd into it.
 [[ -d build  ]] && rm -rf build
 mkdir -p build && cd build

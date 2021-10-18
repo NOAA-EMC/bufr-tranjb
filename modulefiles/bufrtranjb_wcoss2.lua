@@ -1,12 +1,6 @@
 help([[
-Load environment for running bufr-tranjb on WCOSS2
+Load environment to build bufr-tranjb on WCOSS2
 ]])
-
-local pkgName    = myModuleName()
-local pkgVersion = myModuleVersion()
-local pkgNameVer = myModuleFullName()
-
-conflict(pkgName)
 
 intel_ver=os.getenv("intel_ver") or "default"
 
@@ -17,9 +11,4 @@ load(pathJoin("intel", intel_ver))
 -- Load common modules for this package
 load("bufrtranjb_common")
 
-setenv("FC", "ftn")
-
-whatis("Name: ".. pkgName)
-whatis("Version: ".. pkgVersion)
-whatis("Category: Application")
-whatis("Description: bufr-tranjb application environment")
+whatis("Description: bufr-tranjb build environment")
