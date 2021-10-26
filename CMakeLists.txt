@@ -25,3 +25,6 @@ add_subdirectory(sorc)
 
 # Install utility scripts
 add_subdirectory(ush)
+
+# Install modulefile for this package.
+add_subdirectory(modulefiles)
