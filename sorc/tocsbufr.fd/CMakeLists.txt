@@ -2,7 +2,7 @@ list(APPEND fortran_src
   tocsbufr.f
 )
 
-set(exe_name tocsbufr.x)
+set(exe_name tocsbufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}
