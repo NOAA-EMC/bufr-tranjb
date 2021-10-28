@@ -6,7 +6,7 @@ set(exe_name tocsbufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}
-  bacio::bacio_4
+  bacio::${bacio_name}
   w3emc::w3emc_4
   bufr::bufr_4
   sp::sp_4
