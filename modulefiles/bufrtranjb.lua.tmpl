@@ -1,0 +1,22 @@
+help([[
+Sets environment variables for bufr-tranjb package
+]])
+
+local pkgName = myModuleName()
+local pkgVersion = myModuleVersion()
+local pkgNameVer = myModuleFullName()
+
+conflict(pkgName)
+
+local base = "@CMAKE_INSTALL_PREFIX@"
+
+setenv("CWORDX", pathJoin(base, "exec/bufr_cword"))
+setenv("CWORDush", pathJoin(base, "ush/bufr_cword.sh"))
+setenv("TRANX", pathJoin(base, "exec/bufr_tranjb"))
+setenv("TRANush", pathJoin(base, "ush/bufr_tranjb.sh"))
+setenv("TOCSBUFR", pathJoin(base, "exec/tocsbufr"))
+
+whatis("Name: ".. pkgName)
+whatis("Version: " .. pkgVersion)
+whatis("Category: Utility")
+whatis("Description: This module sets the environment variables for BUFR TRANJB package")
