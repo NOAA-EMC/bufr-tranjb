@@ -16,9 +16,9 @@ if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   module use $pkg_root/modulefiles
   module load bufrtranjb_$target
   module list
-  module unload bufr
-# export bufr_ROOT=/lfs/h2/emc/obsproc/noscrub/Jeff.Ator/NCEPLIBS-bufr-GitHub/build_forSudhir/install
-  export bufr_ROOT=/lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/install/install/bufr
+  # To use local version of bufr library, modify and uncomment next 2 lines
+  #module unload bufr
+  #export bufr_ROOT=/lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/install/install/bufr
   set -x
 fi
 
