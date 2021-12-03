@@ -714,7 +714,7 @@ C^^^^^ remapping b002/xx101 ---> b002/xx001                 [CH 11/2019]
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 
-ccccccCALL W3TAGB('BUFR_TRANJB',2019,0351,1200,'NP22')
+ccccccCALL W3TAGB('BUFR_TRANJB',2021,0337,1200,'NP22')
 
       CALL GET_ENVIRONMENT_VARIABLE('SUBDATE_CHECK',SUBDATE_CHECK)
       SUBDATE_CHECK_orig = SUBDATE_CHECK
@@ -731,7 +731,7 @@ ccccccCALL W3TAGB('BUFR_TRANJB',2019,0351,1200,'NP22')
 
       IF(RUN_TYPE(1:1).EQ.' ')  RUN_TYPE = 'decoder'  ! default
 
-      PRINT'(/" ==> Welcome to BUFR_TRANJB -- Version 12-17-2019 -- "
+      PRINT'(/" ==> Welcome to BUFR_TRANJB -- Version 12-03-2021 -- "
      $ "RUN TYPE IS ",A,/)', trim(RUN_TYPE)
 
 
@@ -1744,6 +1744,11 @@ C       a (temporary) workaround in response to the termination of
 C       CMA TAC radiosonde reports that had been written to b002/xx001
 C       up until 01/15/20. Once we are ready to handle the BUFR-
 C       feed in tanks b002/xx101 this logic can be removed.
+C 2021-11-29 J. Ator --
+C     - Added the following to the list of types which qualify as
+C       "restricted" when "CHGRP_RSTPROD" is "YES" (meaning group will 
+C       be changed to "rstprod" and permission will be set to "640"):
+C          NC003010 - GPS radio occultation
 C
 C USAGE:    CALL TYPTIM(MTYP,MSBT,CDATE,IERR)
 C   INPUT ARGUMENT LIST:
@@ -1972,6 +1977,7 @@ C  --------------------------------------------------------------------
      $           (MTYP.EQ.'001'.and.MSBT.eq.'001').OR.   ! b001/xx001
      $           (MTYP.EQ.'001'.and.MSBT.eq.'101').OR.   ! b001/xx101
      $           (MTYP.EQ.'002'.and.MSBT.eq.'020').OR.   ! b002/xx020
+     $           (MTYP.EQ.'003'.and.MSBT.eq.'010').OR.   ! b003/xx010
      $           (MTYP.EQ.'004'.and.MSBT.eq.'003').OR.   ! b004/xx003
      $           (MTYP.EQ.'004'.and.MSBT.eq.'004').OR.   ! b004/xx004
      $           (MTYP.EQ.'004'.and.MSBT.eq.'006').OR.   ! b004/xx006
