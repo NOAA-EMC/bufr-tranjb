@@ -2,11 +2,12 @@
 
 set -eux
 
-INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
-INSTALL_PREFIX=${INSTALL_PREFIX:-"../install"}
-
 # Location of PWD and package source directory.
 pkg_root=`dirname $(readlink -f $0)`
+
+INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
+INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
+MODULEFILE_INSTALL_PREFIX=${MODULEFILE_INSTALL_PREFIX:-$INSTALL_PREFIX/modulefiles}
 
 target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
@@ -16,9 +17,6 @@ if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   module use $pkg_root/modulefiles
   module load bufrtranjb_$target
   module list
-  # To use local version of bufr library, modify and uncomment next 2 lines
-  #module unload bufr
-  #export bufr_ROOT=/lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/install/install/bufr
   set -x
 fi
 
@@ -27,8 +25,15 @@ fi
 mkdir -p build && cd build
 
 # build and install.
-cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_INSTALL_BINDIR=exec ..
+cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
+      -DCMAKE_INSTALL_BINDIR=exec \
+      -DMODULEFILE_INSTALL_PREFIX=$MODULEFILE_INSTALL_PREFIX \
+      ..
 make -j ${BUILD_JOBS:-6} VERBOSE=${BUILD_VERBOSE:-}
 make install
+
+# Remove build directory upon successfull build and install
+cd $pkg_root
+rm -rf build
 
 exit 0
