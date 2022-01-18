@@ -174,6 +174,8 @@
 # 2021-09  A. Richert  Porting to WCOSS2. date2jday accessed through PATH.
 #        CWORD-related variables must be sufficiently defined (no hardcoded
 #        fallback path).
+# 2022-01-17 S. Nadiga  Replaced $DATA with $UTILROOT/ush before calling 
+#         utility scripts to properly leverage the prod_util module.
 #         
 #
 # Usage: bufr_tranjb.sh  <tank_dir>  <bufrfile>
