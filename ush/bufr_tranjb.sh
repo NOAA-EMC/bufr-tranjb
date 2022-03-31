@@ -174,6 +174,8 @@
 # 2021-09  A. Richert  Porting to WCOSS2. date2jday accessed through PATH.
 #        CWORD-related variables must be sufficiently defined (no hardcoded
 #        fallback path).
+# 2022-01-17 S. Nadiga  Replaced $DATA with $UTILROOT/ush before calling 
+#         utility scripts to properly leverage the prod_util module.
 #         
 #
 # Usage: bufr_tranjb.sh  <tank_dir>  <bufrfile>
@@ -194,9 +196,9 @@
 #   Modules and files referenced in this script:
 #     scripts    : date2jday.sh (in $PATH, from prod_util)
 #                  $CWORDush
-#                  $DATA/postmsg
-#                  $DATA/prep_step
-#                  $DATA/startmsg
+#                  $UTILROOT/ush/postmsg
+#                  $UTILROOT/ush/prep_step
+#                  $UTILROOT/ush/startmsg
 #     data cards : none
 #     executables: $TRANX
 # ##YL*****                 tocsbufr
@@ -520,7 +522,7 @@ copied to $tank_dir/F8_unblocked.$host.$$" >> $tmp
          echo "$msg" >> $tmp
          echo
          msg=`echo $msg, input file: $bufrfile.`
-         [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+         [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
       fi
       rm $tank_dir/bufr_cword.out.$host.$$
    else 
@@ -529,7 +531,7 @@ copied to $tank_dir/F8_unblocked.$host.$$" >> $tmp
       msg="***WARNING: BUFR_CWORD processing FAILED - No input BUFR messages \
 were unblocked into output file - no output file created"
       msg=`echo $msg, input file: $bufrfile.`
-      [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+      [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
 
 #  scroll the report into the log file(s) and exit
 #  -----------------------------------------------
@@ -565,7 +567,7 @@ fi
 
 pgm=`basename  $TRANX`
 msg="$pgm has BEGUN"
-[ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+[ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
 
 export FORT8=$tank_dir/F8_unblocked.$host.$$
 
@@ -607,15 +609,15 @@ if [ -n "$COPYFILES" -a -n "$DATA" ]; then
 cut -c12-`
 
       msg="attempt to standardize and save this NCEP BUFR file"
-      [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+      [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
 
 #  Convert NCEP BUFR file to "standard" WMO BUFR file
 #  --------------------------------------------------
       export pgm=tocsbufr
-      . $DATA/prep_step
+      . $UTILROOT/ush/prep_step
       export FORT11=$tank_dir/F8_unblocked.$host.$$
       export FORT51=$tank_dir/bufrout.$host.$$
-      $DATA/startmsg
+      $UTILROOT/ush/startmsg
 ##     $utilexec/tocsbufr << EOF
       ${TOCSBUFR:-$utilexec/tocsbufr} << EOF
  &INPUT
@@ -712,7 +714,7 @@ EOF
              $tank_dir/$yyyymmdd/wbufbul/$bufrfile_base
             msg="$bufrfile_base successfully standardized and saved in \
 $tank_dir/$yyyymmdd/wbufbul"
-            [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+            [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
             if [ -n "$SENDDBN" ]; then
                if [ $SENDDBN = YES ]; then
 
@@ -737,12 +739,12 @@ because target directory could not be obtained (date qualifier out of range)"
                msg="***WARNING: $bufrfile_base standardized but not saved \
 because target directory could not be obtained (no valid date qualifier found)"
             fi
-            [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+            [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
          fi
       else
          msg="***WARNING: standardization of NCEP BUFR file FAILED, thus it \
 is not saved"
-         [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+         [ -n "$jlogfile" ] && $UTILROOT/ush/postmsg "$jlogfile" "$msg"
       fi
 ###############################################################################
    fi
