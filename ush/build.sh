@@ -10,6 +10,10 @@ INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
 MODULEFILE_INSTALL_PREFIX=${MODULEFILE_INSTALL_PREFIX:-$INSTALL_PREFIX/modulefiles}
 
+INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
+INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
+MODULEFILE_INSTALL_PREFIX=${MODULEFILE_INSTALL_PREFIX:-$INSTALL_PREFIX/modulefiles}
+
 target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   source $pkg_root/versions/build.ver
