@@ -1,3 +1,45 @@
+bufr_tranjb v1.0.3      RELEASED        SEP 29, 2022
+                        IMPLEMENTED     OCT 13, 2022 ??
+
+FILE CHANGES
+
+M CMakeLists.txt
+D build.sh
+D README.md
+D VERSION
+A docs/README.md
+A docs/Release_Notes.txt
+A ush/build.sh
+A versions/VERSION
+
+DOCS CHANGES
+
+ docs/README.md
+ Update build instructions
+
+ docs/Release_Notes.txt
+ Added for easy reference on developmnet history
+
+USH CHANGES
+
+ ush/build.sh
+ Moved build.sh here to adhere to NCO EE2 standards (no files in top level dir)
+
+VERSIONS CHANGES
+
+ Updated VERSION and moved to versionis/ to adhere to NCO EE2 standards (no files in top level dir)
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ Implement release/satingest.v4.3.0 and release/bufr_tranjb.v1.0.3 at the same time
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.0.2	RELEASED	DEC 22, 2021
 			IMPLEMENTED	JUN 28, 2022
 
