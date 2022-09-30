@@ -3,7 +3,12 @@
 set -eux
 
 # Location of PWD and package source directory.
-pkg_root=`dirname $(readlink -f $0)`
+#pkg_root=`dirname $(readlink -f $0)`
+readonly pkg_root=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )/.." && pwd -P)
+
+INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
+INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
+MODULEFILE_INSTALL_PREFIX=${MODULEFILE_INSTALL_PREFIX:-$INSTALL_PREFIX/modulefiles}
 
 INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
@@ -13,7 +18,7 @@ target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   source $pkg_root/versions/build.ver
   set +x
-  module purge
+  module reset
   module use $pkg_root/modulefiles
   module load bufrtranjb_$target
   module list

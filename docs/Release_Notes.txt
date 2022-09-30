@@ -1,0 +1,93 @@
+bufr_tranjb v1.0.2	RELEASED	DEC 22, 2021
+			IMPLEMENTED	JUN 28, 2022
+
+Transition from WCOSS Phase3 to WCOSS2.
+======================================
+https://docs.google.com/document/d/1LrIW_UDvSvpgFAif2689aMYQfHPOTxVV1li8_iHhByE/edit#
+
+NOTE: 
+ This is to replace the bufr_tranjb that the SPA group got put in place ahead of satingest to accelerate usage by non-obsproc users of tranjb: bufr_tranjb.v1.0.0
+ module use /apps/ops/prod/nco/modulefiles/core
+ module load bufr_tranjb/1.0.1
+
+Where is the release tag on subversion/git/vlab? 
+ git clone https://github.com/NOAA-EMC/bufr-tranjb
+ git checkout release/bufr_tranjb.v1.0.2
+
+List of external software used (anything outside of your vertical structure), including compilers and version numbers for everything
+ Software used must be a minimal list of modules/versions specified per job
+ bufr_ver=11.6.0
+ bacio_ver=2.4.1
+ w3emc_ver=2.9.1
+ sp_ver=2.3.3
+ sigio_ver=2.3.2
+
+List of all code/scripts modified with this release
+---------------------------------------------------
+A CMakeLists.txt
+A README.md
+A VERSION
+A build.sh
+A modulefiles/CMakeLists.txt
+A modulefiles/bufrtranjb.lua.tmpl
+A modulefiles/bufrtranjb_common.lua
+A modulefiles/bufrtranjb_hera.lua
+A modulefiles/bufrtranjb_orion.lua
+A modulefiles/bufrtranjb_wcoss2.lua
+A sorc/CMakeLists.txt
+A sorc/bufr_cword.fd/CMakeLists.txt
+  sorc/bufr_cword.fd/cword.f
+A sorc/bufr_tranjb.fd/CMakeLists.txt
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+A sorc/tocsbufr.fd/CMakeLists.txt
+  sorc/tocsbufr.fd/tocsbufr.f
+A ush/CMakeLists.txt
+  ush/bufr_cword.sh
+  ush/bufr_tranjb.sh
+A versions/build.ver
+--------------------
+M-modified; A-added; D-deleted
+
+What changes were made to the above code/scripts to support the new architecture?
+ bufr_tranjb has been removed from the obsproc software package to be a standalone application, installed on WCOSS2 as a module.
+ bufr_tranjb has been moved to github as its own repository. https://github.com/NOAA-EMC/bufr-tranjb
+ bufr_tranjb utilizes cmake to build and install the code. build bufr-tranjb repo with cmake
+
+Were any other changes made that aren’t directly related to the transition?
+ sorc/bufr_tranjb.fd/bufr_tranjb.f was modified to restrict the GPS-RO bufr data tank: b003/xx010
+
+Are there any changes to incoming data needs or outgoing products? 
+ No
+
+If output filenames are changing, list the current and new filename 
+ N/A
+
+Compute resource information, for every job:
+ Please see https://github.com/NOAA-EMC/satingest release branch release/satingest.v4.1.0/TRIGGERS for JISATINGEST trigger settings
+ Total tasks
+ Tasks per node
+ Serial or parallel or mpmd
+ Memory requirements (exclusive or shared)
+
+List any other PBS resource information requirements or MPI tunables
+ *** Providing PBS and/or ecFlow submission scripts as part of release tag is preferred; if they are provided then resource information is not needed in the release notes.
+
+Runtime changes compared to current production (/gpfs/dell1/nco/ops/com/logs/runtime/daily/* for current stats) 
+ None
+
+Disk space required per day or per cycle; data retention on disk will remain the same unless otherwise requested.
+ Same as WCOSS1
+
+Dissemination will remain the same unless otherwise communicated to NCO and a PNS/SCN issued
+ HPSS archive retention will remain the same unless approval granted by HPCRAC
+
+What are your up and downstream dependencies?
+ NESDIS PDA subscriptions
+
+Provide a pointer to your COMOUT, temp directory and pbspro output file that was used during testing:
+ see satingest.v4.1.0 Release Notes
+===========================================================================
+WCOSS1 RN:https://github.com/ShelleyMelchior-NOAA/smelchior/tree/main/RNs
+
+END
+
