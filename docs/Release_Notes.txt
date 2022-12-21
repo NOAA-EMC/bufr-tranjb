@@ -1,5 +1,5 @@
 bufr_tranjb v1.0.3      RELEASED        SEP 29, 2022
-                        IMPLEMENTED     OCT 13, 2022
+                        IMPLEMENTED     OCT 18, 2022
 PRELUDE
 
  Top level documents (except CMakeLists.txt) were moved to relevant directories to meet NCO EE2 standards.
