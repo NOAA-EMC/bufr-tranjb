@@ -9,7 +9,12 @@ Clone repository:
 git clone https://github.com/noaa-emc/bufr-tranjb
 ```
 
-Move into desired branch and then run:
+Move into desired branch:
+```bash
+cd bufr-tranjb
+git checkout desired_branch
+```
+and then run:
 
 ```bash
 INSTALL_PREFIX=/path/you/wish/to/install/bufr-tranjb ./ush/build.sh
