@@ -1191,6 +1191,9 @@ C  -----------------------------------
  
             DO WHILE(IREADSB(INBFR).EQ.0)
                NSUBSETSRD = NSUBSETSRD + 1
+CC        print*, 'steve steve steve steve steve line 1194'
+CC        print*, 'IREADSB(INBFR) ', IREADSB(INBFR)
+CC        print*, 'NSUBSETSRD ', NSUBSETSRD
 
 C  USE FIRST DATE ENCOUNTERED; EXCEPTION: MULTIPLE DATES WHERE ONE DATE
 C   HAS A TIME SIGNIFICANCE QUALIFIER (TSIG) OF 25, USE THIS DATE
@@ -1254,18 +1257,23 @@ ccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
 cppppp
 ccc    print *, '^^^ reading a subset with Table A ',tablea,
 ccc  .  ' from unit ',inbfr
-ccc    print *, 'IY,IM,ID,IH,MI: ',IY,IM,ID,IH,MI
+CC       print *, 'steve IY,IM,ID,IH,MI,ISELECT,NLEV ',IY,IM,ID,IH,MI,ISELECT,NLEV
 cppppp
  
                IF(IBFMS(DATES_8(3,ISELECT)).NE.0 .AND.
      $            IBFMS(DATES_8(4,ISELECT)).NE.0) THEN
                   CALL UFBINT(INBFR,DOYR_8,1,1,NLEV,'DOYR');DOYR=DOYR_8
                   IF(IBFMS(DOYR_8).NE.0) THEN
-                     PRINT'(/25("*"),"ABORT",25("*")/"ONE OR MORE ",
-     $                "SUBSETS READ IN DO NOT HAVE AN INTERNAL DATE  ",
-     $                "-- STOP 96"/25("*"),"ABORT",25("*")/)'
+c                     PRINT'(/25("*"),"ABORT",25("*")/"ONE OR MORE ",
+c     $                "SUBSETS READ IN DO NOT HAVE AN INTERNAL DATE  ",
+c     $                "-- STOP 96"/25("*"),"ABORT",25("*")/)'
 cccccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
-                     CALL ERREXIT(96)
+CC	print*, 'steve steve steve steve steve line 1269'
+CC	print*, 'IBFMS(DOYR_8),NLEV ', IBFMS(DOYR_8),NLEV
+	print*, 'ONE OR MORE SUBSETS READ DO NOT HAVE AN INTERNAL DATE'
+        print*, 'SKIPPING TO NEXT REPORT'
+		     cycle
+ccc                     CALL ERREXIT(96)
                   ELSE
                      IDOYR = NINT(DOYR)
 cppppp
