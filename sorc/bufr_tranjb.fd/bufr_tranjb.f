@@ -415,6 +415,12 @@ C       TAC radiosonde reports that had been written to b002/xx001 up
 C       until 01/15/20. Once we are ready to handle the BUFR-feed in tank
 C       b002/xx101 this logic can be removed.
 C
+C 2023-06-07 S. Stegall --
+C       Added logic to cycle to next report when ONE OR MORE SUBSETS READ DO NOT HAVE AN INTERNAL DATE
+C       SKIPPING TO NEXT REPORT and print an error message.
+
+
+
 C USAGE:
 C   INPUT FILES:
 C     UNIT 08  - INPUT BUFR FILE (OUTPUT FROM NCO/SIB-DEVELOPED DECODER
@@ -1191,9 +1197,7 @@ C  -----------------------------------
  
             DO WHILE(IREADSB(INBFR).EQ.0)
                NSUBSETSRD = NSUBSETSRD + 1
-CC        print*, 'steve steve steve steve steve line 1194'
-CC        print*, 'IREADSB(INBFR) ', IREADSB(INBFR)
-CC        print*, 'NSUBSETSRD ', NSUBSETSRD
+
 
 C  USE FIRST DATE ENCOUNTERED; EXCEPTION: MULTIPLE DATES WHERE ONE DATE
 C   HAS A TIME SIGNIFICANCE QUALIFIER (TSIG) OF 25, USE THIS DATE
@@ -1268,8 +1272,7 @@ c                     PRINT'(/25("*"),"ABORT",25("*")/"ONE OR MORE ",
 c     $                "SUBSETS READ IN DO NOT HAVE AN INTERNAL DATE  ",
 c     $                "-- STOP 96"/25("*"),"ABORT",25("*")/)'
 cccccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
-CC	print*, 'steve steve steve steve steve line 1269'
-CC	print*, 'IBFMS(DOYR_8),NLEV ', IBFMS(DOYR_8),NLEV
+
 	print*, 'ONE OR MORE SUBSETS READ DO NOT HAVE AN INTERNAL DATE'
         print*, 'SKIPPING TO NEXT REPORT'
 		     cycle
