@@ -415,6 +415,12 @@ C       TAC radiosonde reports that had been written to b002/xx001 up
 C       until 01/15/20. Once we are ready to handle the BUFR-feed in tank
 C       b002/xx101 this logic can be removed.
 C
+C 2023-06-07 S. Stegall --
+C       Added logic to cycle to next report when ONE OR MORE SUBSETS READ DO NOT HAVE AN INTERNAL DATE
+C       SKIPPING TO NEXT REPORT and print an error message.
+
+
+
 C USAGE:
 C   INPUT FILES:
 C     UNIT 08  - INPUT BUFR FILE (OUTPUT FROM NCO/SIB-DEVELOPED DECODER
@@ -1192,6 +1198,7 @@ C  -----------------------------------
             DO WHILE(IREADSB(INBFR).EQ.0)
                NSUBSETSRD = NSUBSETSRD + 1
 
+
 C  USE FIRST DATE ENCOUNTERED; EXCEPTION: MULTIPLE DATES WHERE ONE DATE
 C   HAS A TIME SIGNIFICANCE QUALIFIER (TSIG) OF 25, USE THIS DATE
 C   SINCE IT SHOULD REPRESENT THE "Nominal reporting time"
@@ -1254,18 +1261,22 @@ ccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
 cppppp
 ccc    print *, '^^^ reading a subset with Table A ',tablea,
 ccc  .  ' from unit ',inbfr
-ccc    print *, 'IY,IM,ID,IH,MI: ',IY,IM,ID,IH,MI
+CC       print *, 'steve IY,IM,ID,IH,MI,ISELECT,NLEV ',IY,IM,ID,IH,MI,ISELECT,NLEV
 cppppp
  
                IF(IBFMS(DATES_8(3,ISELECT)).NE.0 .AND.
      $            IBFMS(DATES_8(4,ISELECT)).NE.0) THEN
                   CALL UFBINT(INBFR,DOYR_8,1,1,NLEV,'DOYR');DOYR=DOYR_8
                   IF(IBFMS(DOYR_8).NE.0) THEN
-                     PRINT'(/25("*"),"ABORT",25("*")/"ONE OR MORE ",
-     $                "SUBSETS READ IN DO NOT HAVE AN INTERNAL DATE  ",
-     $                "-- STOP 96"/25("*"),"ABORT",25("*")/)'
+c                     PRINT'(/25("*"),"ABORT",25("*")/"ONE OR MORE ",
+c     $                "SUBSETS READ IN DO NOT HAVE AN INTERNAL DATE  ",
+c     $                "-- STOP 96"/25("*"),"ABORT",25("*")/)'
 cccccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
-                     CALL ERREXIT(96)
+
+	print*, 'ONE OR MORE SUBSETS READ DO NOT HAVE AN INTERNAL DATE'
+        print*, 'SKIPPING TO NEXT REPORT'
+		     cycle
+ccc                     CALL ERREXIT(96)
                   ELSE
                      IDOYR = NINT(DOYR)
 cppppp
