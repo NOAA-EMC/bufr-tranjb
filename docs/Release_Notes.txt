@@ -1,3 +1,50 @@
+bufr_tranjb v1.0.4      RELEASED        JUL ??, 2023
+                        IMPLEMENTED     JUL ??, 2023
+PRELUDE
+
+ Safety check added for ingesting saildrone data.
+
+FILE CHANGES
+
+M docs/README.md
+M docs/Release_Notes.txt
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M versions/build.ver
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+
+ docs/README.md
+ Update build instructions
+
+ docs/Release_Notes.txt
+ Updated to reflect changes
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Add a safety check for incoming saildrone data's timestamp, skip messages with wrong/missing timestamp
+
+VERSIONS CHANGES
+
+ versions/build.ver
+ Update bufr library version
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ Implement release/bufr_tranjb.v1.0.4 at the same time (or after) release/satingest.v4.7.0  
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.0.3      RELEASED        SEP 29, 2022
                         IMPLEMENTED     OCT 18, 2022
 PRELUDE
