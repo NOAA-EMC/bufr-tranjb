@@ -1,5 +1,5 @@
-bufr_tranjb v1.0.4      RELEASED        JUL ??, 2023
-                        IMPLEMENTED     JUL ??, 2023
+bufr_tranjb v1.0.4      RELEASED        AUG ??, 2023
+                        IMPLEMENTED     AUG ??, 2023
 PRELUDE
 
  Safety check added for ingesting saildrone data.
