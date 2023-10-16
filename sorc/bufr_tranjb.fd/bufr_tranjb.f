@@ -719,7 +719,7 @@ C^^^^^ remapping b002/xx101 ---> b002/xx001                 [CH 11/2019]
 
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
-
+      
 ccccccCALL W3TAGB('BUFR_TRANJB',2021,0337,1200,'NP22')
 
       CALL GET_ENVIRONMENT_VARIABLE('SUBDATE_CHECK',SUBDATE_CHECK)
@@ -1261,7 +1261,7 @@ ccccccccccccccccccCALL W3TAGE('BUFR_TRANJB')
 cppppp
 ccc    print *, '^^^ reading a subset with Table A ',tablea,
 ccc  .  ' from unit ',inbfr
-CC       print *, 'steve IY,IM,ID,IH,MI,ISELECT,NLEV ',IY,IM,ID,IH,MI,ISELECT,NLEV
+CC       print *, ' IY,IM,ID,IH,MI,ISELECT,NLEV ',IY,IM,ID,IH,MI,ISELECT,NLEV
 cppppp
  
                IF(IBFMS(DATES_8(3,ISELECT)).NE.0 .AND.
@@ -1821,7 +1821,7 @@ C^^^^^ remapping b002/xx101 ---> b002/xx001                 [CH 11/2019]
 
 C  SEE WHICH TYPE FILE THIS REPORT GOES INTO AND ASSEMBLE A FILENAME
 C  -----------------------------------------------------------------
- 
+       
       IF(MTYP.EQ.'031'.AND.MSBT(1:1).EQ.'0') THEN
              ! Oceanographic data (BUFR type 031) with subtype < 100
              !  written to monthly tank files
@@ -1975,18 +1975,19 @@ C  ------------------------------------------------------------------
             IF(IEDTN.NE.3.AND.SUBDATE_CHECK.NE.'NO')
      $       CALL PKVS01('BEN',IEDTN)
             IF(IMESSAGE_LENGTH.GT.0)  CALL MAXOUT(IMESSAGE_LENGTH)
-
+      
             IF(CHGRP_RSTPROD.EQ.'YES' .OR.
      $         CHGRP_RSTPROD.EQ.'ALL')  THEN
 
 C  CHANGE GROUP & PERMISSION ON RESTRICTED TANKS TO rstprod & 640, RESP
 C  --------------------------------------------------------------------
-
+      
               IF((MTYP.EQ.'000'.and.MSBT.eq.'000').OR.   ! b000/xx000
      $           (MTYP.EQ.'000'.and.MSBT.eq.'020').OR.   ! b000/xx020
      $           (MTYP.EQ.'000'.and.MSBT.eq.'100').OR.   ! b000/xx100
      $           (MTYP.EQ.'001'.and.MSBT.eq.'001').OR.   ! b001/xx001
      $           (MTYP.EQ.'001'.and.MSBT.eq.'101').OR.   ! b001/xx101
+     $           (MTYP.EQ.'001'.and.MSTB.eq.'121').OR.   ! b001/xx121
      $           (MTYP.EQ.'002'.and.MSBT.eq.'020').OR.   ! b002/xx020
      $           (MTYP.EQ.'003'.and.MSBT.eq.'010').OR.   ! b003/xx010
      $           (MTYP.EQ.'004'.and.MSBT.eq.'003').OR.   ! b004/xx003
