@@ -1,5 +1,50 @@
+bufr_tranjb v1.0.5      RELEASED        OCT 26, 2023
+                        IMPLEMENTED     NOV ??, 2023
+
+PRELUDE
+
+ Preemtive tank restriction. Needed for decoder/ingest development (SoFar buoy profiles,b001/xx121) 
+
+FILE CHANGES
+
+M docs/Release_Notes.txt
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+
+ docs/Release_Notes.txt
+ Updated to reflect code changes 
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Preemtive tank restriction. Needed for decoder/ingest development for SoFar buoy profiles, b001/xx121
+
+VERSIONS CHANGES
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ release/bufr_tranjb.v1.0.5 is precipitated by the need to restrict an upcoming new tank.
+ The decoder for that future tank is under development. Testing it will require release/bufr_tranjb.v1.0.5 to be implemented.
+ Contact emc.decoders-support@noaa.gov if  there are decoder-related questions.
+ 
+ Testing release/bufr_tranjb.v1.0.5 should show no difference in any current satingest processes.
+ 
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.0.4      RELEASED        AUG ??, 2023
-                        IMPLEMENTED     AUG ??, 2023
+                        IMPLEMENTED     SEP 20, 2023
 PRELUDE
 
  Safety check added for ingesting saildrone data.
