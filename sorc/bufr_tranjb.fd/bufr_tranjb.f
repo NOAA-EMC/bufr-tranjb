@@ -737,7 +737,7 @@ ccccccCALL W3TAGB('BUFR_TRANJB',2021,0337,1200,'NP22')
 
       IF(RUN_TYPE(1:1).EQ.' ')  RUN_TYPE = 'decoder'  ! default
 
-      PRINT'(/" ==> Welcome to BUFR_TRANJB -- Version 12-03-2021 -- "
+      PRINT'(/" ==> Welcome to BUFR_TRANJB -- Version 01-23-2024 -- "
      $ "RUN TYPE IS ",A,/)', trim(RUN_TYPE)
 
 
@@ -1987,7 +1987,7 @@ C  --------------------------------------------------------------------
      $           (MTYP.EQ.'000'.and.MSBT.eq.'100').OR.   ! b000/xx100
      $           (MTYP.EQ.'001'.and.MSBT.eq.'001').OR.   ! b001/xx001
      $           (MTYP.EQ.'001'.and.MSBT.eq.'101').OR.   ! b001/xx101
-     $           (MTYP.EQ.'001'.and.MSTB.eq.'121').OR.   ! b001/xx121
+     $           (MTYP.EQ.'001'.and.MSBT.eq.'121').OR.   ! b001/xx121
      $           (MTYP.EQ.'002'.and.MSBT.eq.'020').OR.   ! b002/xx020
      $           (MTYP.EQ.'003'.and.MSBT.eq.'010').OR.   ! b003/xx010
      $           (MTYP.EQ.'004'.and.MSBT.eq.'003').OR.   ! b004/xx003
