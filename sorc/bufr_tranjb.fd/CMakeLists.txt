@@ -1,5 +1,10 @@
 list(APPEND fortran_src
   bufr_tranjb.f
+  bufr_restrict.f
+  typtim.f
+  remap.f
+  remtdy.f
+  openbt.f
 )
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")

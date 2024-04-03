@@ -1,0 +1,274 @@
+C$$$  SUBPROGRAM DOCUMENTATION BLOCK
+C
+C SUBPROGRAM:    OPENBT
+C   PRGMMR: WEISS            ORG: NP22        DATE: 2024-03-28
+C
+C ABSTRACT: GIVEN A BUFR MESSAGE TYPE, OPENS THE APPROPRIATE EXTERNAL
+C   BUFR MNEMONIC TABLE AND ASSIGNS IT TO FORTRAN UNIT NUMBER
+C   "LUNDX".  ALSO MAKES SURE ALL OUTPUT BUFR FILES ARE CLOSED AND THE
+C   CACHE (ASSIGNING FILENAMES TO UNIT NUMBERS) IS RESET.
+C
+C PROGRAM HISTORY LOG:
+C 1996-09-06  J. WOOLLEN -- ORIGINAL AUTHOR (OVERRIDES DEFAULT ROUTINE
+C     OF SAME NAME IN BUFRLIB)
+C 2001-01-30  D. KEYSER  -- ASSIGNS VALUE FOR BUFR TABLE UNIT NUMBER
+C     (NECESSARY DUE TO BUFRLIB CHANGE SINCE LAST COMPILATION OF THIS
+C     CODE)
+C 2002-04-08  D. KEYSER  -- ADDED DOCBLOCKS, ADDED COMMENTS,
+C     STREAMLINED; EXPANDED STANDARD OUTPUT PRINT TO SUMMARIZE NUMBER
+C     OF REPORTS READ, WRITTEN AND SKIPPED FOR EACH NEW TABLE A ENTRY
+C     READ IN; IMPROVED ALL STANDARD OUTPUT PRINT; LIMITS PRINT TO 100
+C     FOR REPORTS SKIPPED DUE TO BAD OR REJECTED DATE (WITHIN EACH
+C     TABLE A ENTRY READ IN), INSTEAD A LINE SUMMARIZING THE NUMBER OF
+C     REPORTS SKIPPED IS PRINTED AT THE END OF THE TABLE A ENTRY
+C     PROCESSING
+C 2003-12-16  D. KEYSER  -- TESTS FOR THE EXISTENCE OF THE BUFR
+C     MNEMONIC TABLE IN THE DATABASE PARENT DIRECTORY, IF NOT FOUND
+C     PROGRAM NOW STOPS WITH COND. CODE 99
+C 2004-10-19  D. KEYSER  -- USES FULL PATH NAMES FOR BUFR MNEMONIC
+C     TABLE FILE IN OPEN STATEMENTS AND IN ARGUMENT IN CALLS TO
+C     SUBROUTINE SYSTEM (BEFORE USED ONLY FILE NAMES AND ASSUMED
+C     EXECUTING SCRIPT WAS RUNNING IN DATABASE PARENT DIRECTORY); NOW
+C     LOOKS FOR BUFR MNEMONIC TABLE (FILE) IN EITHER PARENT DATABASE
+C     DIRECTORY (FIRST CHOICE) OR IN FIXED FIELD DIRECTORY SPECIFIED BY
+C     EXECUTING SCRIPT (SECOND CHOICE) (BEFORE ONLY CHOICE WAS IN
+C     PARENT DATABASE DIRECTORY), THIS IS IN CONJUNCTION WITH THE
+C     OPERATIONAL TRANSITION OF THE TABLES FROM THE DATABASE PARENT
+C     DIRECTORY /dcom/us007003 TO THE PRODUCTION FIXED FIELD DIRECTORY
+C     /nwprod/fix
+C 2012-09-26  J. WOOLLEN -- INCREASED THE FILE CACHE TO MAXIMUM VALUE
+C     OF 31 FILES AT A TIME
+C 2014-01-21 D. KEYSER   -- NOW THREE CHOICES FOR LOCATING BUFR
+C     MNEMONIC TABLE FILE bufrtab.XXX WHICH DEPEND UPON VALUE OF
+C     "RUN_TYPE", RATHER THAN THE TWO FIXED CHOICES BEFORE.  FIRST
+C     CHOICE REMAINS TANK DIRECTORY (tank_dir) REGARDLESS OF RUN TYPE.
+C     SECOND CHOICE IS OBSPROC_SATINGEST FIX DIRECTORY
+C     (FIXobsproc_satingest) FOR SATINGEST RUN TYPE, AND BUFR FIX
+C     DIRECTORY (FIXbufr) FOR DECODER RUN TYPE.  THIRD CHOICE IS
+C     FIXbufr FOR SATINGEST RUN TYPE AND FIXobsproc_satingest FOR
+C     DECODER RUN TYPE. THIS CHANGE WILL ALLOW DEOCDER RUNS TO USE THIS
+C     VERSION OF BUFR_TRANJB SINCE THE DECODER RUNS WILL USE THE BUFR
+C     MNEMONIC TABLES IN ITS PREFERRED LOCATION of FIXbufr. THE
+C     SATINGEST RUNS WILL, FOR NOW, USE THE BUFR MNEMONIC TABLES IN
+C     THEIR THIRD CHOICE LOCATION (FIXbufr), BUT WILL AUTOMATICALLY
+C     TRANSITION TO THE SECOND CHOICE FIXobsproc_satingest ONCE THE
+C     BUFR MNEMONIC TABLES ARE AVAILABLE THERE.
+C 2017-01-01 D. Stokes   -- Increased string length for array CBAD.
+C 2024-03-28 M. WEISS    -- SEPARATED SUBPROGRAM OPENBT FROM
+C     bufr_tranjb.f. NO OTHER CHANGES
+C
+C USAGE:    CALL OPENBT(LUNDX,MTYP)
+C   INPUT ARGUMENT LIST:
+C     MTYP     - MESSAGE TYPE OF INPUT BUFR FILE
+C
+C   OUTPUT ARGUMENT LIST:
+C     LUNDX    - UNIT NUMBER OF BUFR MNEMONIC TABLE
+C
+C   INPUT FILES:
+C     UNIT "LUNDX" - BUFR MNEMONIC TABLE
+C
+C   OUTPUT FILES:
+C     UNIT 06      - STANDARD OUTPUT PRINT
+C
+C REMARKS: THIS SUBROUTINE IS CALLED ONCE AT THE BEGINNING OF THE
+C   THE MAIN PROGRAM FOR THE FIRST DATA MESSAGE FOUND IN THE INPUT
+C   BUFR FILE.  IT WILL BE CALLED AGAIN FOR SUBSEQUENT DATA MESSAGES
+C   WHENEVER THE BUFR MESSAGE TYPE CHANGES.
+C
+C ATTRIBUTES:
+C   LANGUAGE: FORTRAN 90
+C   MACHINE:  NCEP WCOSS
+C--------------------------------------------------------------------
+C$$$
+      SUBROUTINE OPENBT(LUNDX,MTYP)
+
+      PARAMETER (NFBFR=31)
+ 
+      COMMON /LUNITS/ INBFR,IFBFR,LFBFR,LFUNT,CTABLEA(50:49+NFBFR),
+     $                FLBFR(NFBFR)
+      COMMON /KOUNTS/ IRD(49:49+NFBFR),IWT(49:49+NFBFR),
+     $                ISK(2,49:49+NFBFR),IFL(2,50:49+NFBFR),IDAT(8),
+     $                IHHMM,CREJ(100,50:49+NFBFR),CBAD(100,50:49+NFBFR),
+     $                ISKM(50:49+NFBFR),IFLM(50:49+NFBFR)
+      COMMON /HOMEDC/ IEDTN,IMESSAGE_LENGTH,TANK_DIR,BUFR_FIX_DIR,
+     $                SATINGEST_FIX_DIR,CHGRP_RSTPROD,SUBDATE_CHECK,
+     $                RUN_TYPE
+
+      CHARACTER*500 TANK_DIR,BUFR_FIX_DIR,SATINGEST_FIX_DIR,BTFILE,
+     $              FILE_CHOICE2,FILE_CHOICE3
+      CHARACTER*132 CREJ
+      CHARACTER*132 CBAD
+      CHARACTER*22  FLBFR
+      CHARACTER*18  RUN_TYPE_MNEMONIC_CHOICE2,RUN_TYPE_MNEMONIC_CHOICE3
+      CHARACTER*11  BUFRTAB
+      CHARACTER*9   RUN_TYPE
+      CHARACTER*8   CTABLEA
+      CHARACTER*3   CHGRP_RSTPROD,SUBDATE_CHECK
+
+      LOGICAL       EXIST
+
+C  Summarize counts from the previous message type/subtype processing
+C  ------------------------------------------------------------------
+
+      DO I=1,NFBFR
+         IF(FLBFR(I)(1:1) .NE. ' ')  THEN
+            IFBFR = LFUNT + I
+            PRINT'(80("-"))'
+            DO J=1,100
+               IF(CREJ(J,IFBFR)(1:1).NE.' ')  THEN
+                  PRINT'(A)', CREJ(J,IFBFR)
+                  CYCLE
+               ENDIF
+               EXIT
+            ENDDO
+            DO J=1,100
+               IF(CBAD(J,IFBFR)(1:1).NE.' ')  THEN
+                  PRINT'(A)', CBAD(J,IFBFR)
+                  CYCLE
+               ENDIF
+               EXIT
+            ENDDO
+            PRINT'("Read    ",I7," reports from BUFR messages with ",
+     $       "Table A entry: ",A8)', IRD(IFBFR),CTABLEA(IFBFR)
+            IF(IWT(IFBFR).GT.0)  THEN
+               PRINT'("Wrote   ",I7," reports to BUFR tank in unit ",
+     $          I2)', IWT(IFBFR),IFBFR
+            ELSE
+               PRINT'("Wrote   ",I7," reports")', IWT(IFBFR)
+            ENDIF
+            IF(ISK(1,IFBFR)+ISK(2,IFBFR).GT.0)
+     $       PRINT'("Skipped ",I7," reports")',ISK(1,IFBFR)+ISK(2,IFBFR)
+            IF(IFLM(IFBFR).EQ.1)  THEN
+               PRINT'(/I6," SUBSETS WITH REJECTED DATE (ONLY FIRST 100",
+     $          " MSGS PRINTED) FOR TBL A ENTRY: ",A8," RUN TIME: ",
+     $          I2.2,"/",I2.2,"/",I4," AT ",I4.4,"Z")',
+     $          ISK(1,IFBFR),CTABLEA(IFBFR),IDAT(2),IDAT(3),IDAT(1),
+     $          IHHMM
+            ENDIF
+            IF(IFL(1,IFBFR).EQ.1)  THEN
+               PRINT'(/I6," SUBSETS WITH REJECTED DATE (ONLY FIRST 100",
+     $          " PRINTED) FOR TABLE A ENTRY: ",A8,"    RUN TIME: ",
+     $          I2.2,"/",I2.2,"/",I4," AT ",I4.4,"Z")',
+     $          ISK(1,IFBFR),CTABLEA(IFBFR),IDAT(2),IDAT(3),IDAT(1),
+     $          IHHMM
+            ENDIF
+            IF(IFL(2,IFBFR).EQ.1)  THEN
+               PRINT'(/I6," SUBSETS WITH    BAD   DATE (ONLY FIRST 100",
+     $          " PRINTED) FOR TABLE A ENTRY: ",A8,"    RUN TIME: ",
+     $          I2.2,"/",I2.2,"/",I4," AT ",I4.4,"Z")',
+     $          ISK(2,IFBFR),CTABLEA(IFBFR),IDAT(2),IDAT(3),IDAT(1),
+     $          IHHMM
+            ENDIF
+         ENDIF
+      ENDDO
+
+      IRD(50:49+NFBFR)   = 0
+      IWT(50:49+NFBFR)   = 0
+      ISK(:,50:49+NFBFR) = 0
+      IFL                = 0
+      CREJ               = ' '
+      CBAD               = ' '
+ 
+
+      LUNDX = 20  ! LUNDX must be defined in this subroutine
+ 
+      WRITE(BUFRTAB,'("bufrtab.",i3.3)') MTYP
+
+C----------------------------------------------------------------------
+C LOOK FOR THE APPROPRIATE EXTERNAL BUFR MNEMONIC TABLE DIRECTORY PATH
+C----------------------------------------------------------------------
+
+      IFOUND = 0
+
+      IF(trim(RUN_TYPE).EQ.'satingest') THEN
+         FILE_CHOICE2 = trim(SATINGEST_FIX_DIR)
+         FILE_CHOICE3 = trim(BUFR_FIX_DIR)
+         RUN_TYPE_MNEMONIC_CHOICE2 = 'SATINGEST_FIX_DIR'
+         RUN_TYPE_MNEMONIC_CHOICE3 = 'BUFR_FIX_DIR'
+      ELSE
+         FILE_CHOICE2 = trim(BUFR_FIX_DIR)
+         FILE_CHOICE3 = trim(SATINGEST_FIX_DIR)
+         RUN_TYPE_MNEMONIC_CHOICE2 = 'BUFR_FIX_DIR'
+         RUN_TYPE_MNEMONIC_CHOICE3 = 'SATINGEST_FIX_DIR'
+      ENDIF
+
+C  First choice is the TANK directory "TANK_DIR" regardless of RUN_TYPE
+C  --------------------------------------------------------------------
+
+      BTFILE = trim(TANK_DIR)//'/'//BUFRTAB
+      INQUIRE(FILE=BTFILE,EXIST=EXIST)
+      IF(EXIST) THEN
+         CLOSE(LUNDX)
+         OPEN (LUNDX,FILE=BTFILE)
+         PRINT'(101("=")/"OPENING BUFR MNEMONIC TABLE: ",A,"/",A," IN ",
+     $    "UNIT",I3," ---> Clear the cache")',
+     $    trim(TANK_DIR),BUFRTAB,LUNDX
+         IFOUND = 1
+cppppp
+ccc   print *, 'Go with 1st choice - TANK_DIR'
+cppppp
+      ELSE
+
+C  For RUN_TYPE = satingest, second choice is the OBSPROC_SATINGEST
+C   FIX directory "SATINGEST_FIX_DIR"
+C  For RUN_TYPE = decoder, second choice is the BUFR FIX directory
+C   "BUFR_FIX_DIR"
+C  ----------------------------------------------------------------
+
+         BTFILE = trim(FILE_CHOICE2)//'/'//BUFRTAB
+         INQUIRE(FILE=BTFILE,EXIST=EXIST)
+         IF(EXIST) THEN
+            CLOSE(LUNDX)
+            OPEN (LUNDX,FILE=BTFILE)
+            PRINT'(101("=")/"OPENING BUFR MNEMONIC TABLE: ",A,"/",A,
+     $       " IN UNIT",I3," ---> Clear the cache")',
+     $       trim(FILE_CHOICE2),BUFRTAB,LUNDX
+            IFOUND = 1
+cppppp
+ccc   print *, 'For RUN_TYPE ',trim(RUN_TYPE),', go with 2nd choice - ',
+ccc  $         trim(RUN_TYPE_MNEMONIC_CHOICE2)
+cppppp
+         ELSE
+
+C  For RUN_TYPE = satingest, third choice is the BUFR FIX directory,
+C   "BUFR_FIX_DIR"
+C  For RUN_TYPE = decoder, third choice is the OBSPROC_SATINGEST FIX
+C   directory "SATINGEST_FIX_DIR"
+C  -----------------------------------------------------------------
+
+            BTFILE = trim(FILE_CHOICE3)//'/'//BUFRTAB
+            INQUIRE(FILE=BTFILE,EXIST=EXIST)
+            IF(EXIST) THEN
+               CLOSE(LUNDX)
+               OPEN (LUNDX,FILE=BTFILE)
+               PRINT'(101("=")/"OPENING BUFR MNEMONIC TABLE: ",A,"/",A,
+     $          " IN UNIT",I3," ---> Clear the cache")',
+     $          trim(FILE_CHOICE3),BUFRTAB,LUNDX
+               IFOUND = 1
+cppppp
+ccc   print *, 'For RUN_TYPE ',trim(RUN_TYPE),', go with 3rd choice - ',
+ccc  $         trim(RUN_TYPE_MNEMONIC_CHOICE3)
+cppppp
+            ENDIF
+         ENDIF
+      ENDIF
+      IF(IFOUND.EQ.0) THEN
+         PRINT'(/25("*"),"ABORT",25("*")/"BUFR MNEMONIC TABLE ",A,1X,
+     $    "DOES NOT EXIST IN:"/1X,A," (First choice)"/17X,"-- or --"/1X,
+     $    A," (Second choice)"/17X,"-- or --"/1X,A," (Third choice)"/
+     $    "  ===> STOP 98"/25("*"),"ABORT",25("*")/)',
+     $   BUFRTAB,trim(TANK_DIR),trim(FILE_CHOICE2),trim(FILE_CHOICE3)
+cccccccccCALL W3TAGE('BUFR_TRANJB')
+         CALL ERREXIT(98)
+      ENDIF
+
+C  CLOSE ALL POSSIBLE OUTPUT BUFR "TANK" FILES AND RESET THE CACHE
+C  (I.E., REMOVE ALL ASSOCIATION BETWEEN FORTRAN UNIT NUMBERS AND
+C  OUTPUT FILENAMES)
+C  ---------------------------------------------------------------
+
+      CALL CLCASH
+ 
+      RETURN
+ 
+      END

@@ -1,3 +1,71 @@
+bufr_tranjb v1.1.0      RELEASED        FEB 23, 2024
+                        IMPLEMENTED     ??? ??, 2024
+
+PRELUDE
+
+ Preemtive addition of a BUFR tank restriction table. Simplifies updating a BUFR tank's restriction status.
+
+FILE CHANGES
+
+A dictionaries/
+A dictionaries/CMakeLists.txt
+A dictionaries/rstprod_bufr_tank.tbl
+M CMakeLists.txt
+M docs/Release_Notes.txt
+M versions/VERSION
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M sorc/bufr_tranjb.fd/CMakeLists.txt
+A sorc/bufr_tranjb.fd/bufr_restrict.f
+A sorc/bufr_tranjb.fd/openbt.f
+A sorc/bufr_tranjb.fd/remap.f
+A sorc/bufr_tranjb.fd/remtdy.f
+A sorc/bufr_tranjb.fd/typtim.f
+(M-modified, A-added, D-deleted)
+
+DICTIONARIES (new sub-directory)
+
+ dictionaries/CMakeLists.txt
+ dictionaries/rstprod_bufr_tank.tbl
+ (Added to reflect code updates)
+
+DOCS CHANGES
+
+ docs/Release_Notes.txt
+ (Additions inserted to reflect code updates) 
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Preemtive addition of a BUFR tank restriction table. Simplifies updating a BUFR tank's restriction status.
+
+ sorc/bufr_tranjb.fd/openbt.f
+ sorc/bufr_tranjb.fd/remap.f
+ sorc/bufr_tranjb.fd/remtdy.f
+ sorc/bufr_tranjb.fd/typtim.f
+ Preemtive separation of called subroutines within bufr_tranjb.f. The bufr_tranjb source code is more manageable this way.
+
+VERSIONS CHANGES
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ release/bufr_tranjb.v1.1.0: To simplify updating/testing a BUFR tank's restriction status with out the need to recompile
+ the bufr_tranjb source code. In addition, internal subroutine codes embedded within bufr_tranjb.f were separated into 
+ distinct program files to allow for easiter mananagement of the bufr_tranjb souce code.
+ Contact emc.decoders-support@noaa.gov if there are decoder-related questions.
+ 
+ Testing release/bufr_tranjb.v1.1.0 should show no difference in any current satingest processes.
+ 
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.0.5      RELEASED        OCT 26, 2023
                         IMPLEMENTED     NOV ??, 2023
 
