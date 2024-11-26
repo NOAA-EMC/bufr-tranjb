@@ -46,6 +46,10 @@ C                         UNBLOCKING AS WELL AS FOR BLOCKING.
 C 2014-01-16  D. KEYSER   INCREASED LIMIT FOR I/O FILENAME LENGTH FROM
 C                         120 CHARACTERS TO 500 CHARACTERS. RENAMED
 C                         FROM CWORDSH TO BUFR_CWORD.
+C 2024-08-15  M. WEISS    ADDED THE STATEMENT "USE BUFR_INTERFACE". 
+C                         CHANGED THE FOLLOWING CALL FUNCTION NAMES:
+C                         COBFL TO COBFL_C, CRBMG TO CRBMG_C,
+C                         CWBMG TO CWBMG_C, AND CCBFL TO CCBFL_C.
 C
 C USAGE:
 C   INPUT FILES:
@@ -60,7 +64,7 @@ C   SUBPROGRAMS CALLED:
 C     LIBRARY:
 C     SYSTEM:    - GET_ENVIRONMENT_VARIABLE
 C       W3NCO    - W3TAGB   W3TAGE   ERREXIT
-C       BUFRLIB  - CCBFL    COBFL    CRBMG    CWBMG    PADMSG
+C       BUFRLIB  - CCBFL_C  COBFL_C  CRBMG_C  CWBMG_C  PADMSG
 C                  IUPBS01
 C
 C   EXIT STATES:
@@ -88,6 +92,8 @@ C
 C$$$
 
       program bufr_cword
+
+      use bufr_interface
 
       parameter(mxbufr=2500000)
       parameter(mxbufrd4=mxbufr/4)
@@ -128,24 +134,24 @@ c     Open the input and output files.
       if(cword.eq.'block') then
          print '(" blocking from: ",A)', trim(ufile)
          print '("            to: ",A)', trim(bfile)
-         call cobfl(ufile,'r')
+         call cobfl_c(ufile,'r')
          open(51,file=bfile,form='unformatted')
       else
          print '(" unblocking from: ",A)', trim(bfile)
          print '("              to: ",A)', trim(ufile)
-         call cobfl(bfile,'r')
-         call cobfl(ufile,'w')
+         call cobfl_c(bfile,'r')
+         call cobfl_c(ufile,'w')
       endif
 
 c     Read the next message from the input file.
 
-      call crbmg(bufr,mxbufr,nbyt,ierr)
+      call crbmg_c(bufr,mxbufr,nbyt,ierr)
       if(ierr.eq.-1) then
-         print '(" Return value from crbmg is -1 on first BUFR message",
+         print '(" crbmg_c return value is -1 on first BUFR message",
      .    " read; input file is empty; no output file created.")'
          go to 88
       elseif(ierr.lt.-1) then
-         print '(" Return value from crbmg is -2 on first BUFR message",
+         print '(" crbmg_c return value is -2 on first BUFR message",
      .    " read; I/O error reading first input BUFR message; no ",
      .    "output file created.")'
          go to 88
@@ -187,9 +193,9 @@ c           using a C write.
      .             "message not written to output because DX_SKIP is ",
      .             "set to ""YES"" or ""yes"".")'
                else
-                  call cwbmg(bufr,ntbyt,ierw)
+                  call cwbmg_c(bufr,ntbyt,ierw)
                   if(ierw.ne.0) then
-                  print '(" return value from cwbmg is ",I0," - I/O ",
+                  print '(" return value from cwbmg_c is ",I0," - I/O ",
      .             "error occurred while writing; message not written ",
      .             "to output")', ierw
                      istop = 4
@@ -200,32 +206,32 @@ c           using a C write.
             endif
          else
             if(ierr.eq.1) then
-               print '(" return value from crbmg is 1 - BUFR message ",
+               print '(" crbmsg_c return value is 1 - BUFR message ",
      .          "array overflow, increase size of array; message not ",
      .          "written to output")'
             elseif(ierr.eq.2) then
-               print '(" return value from crbmg is 2 -""7777"" ",
+               print '(" crbmg_c return value is 2 -""7777"" ",
      .          "indicator not found in expected location; message not",
      .          " written to output")'
             else
-               print '(" return value from crbmg is ",I0,"; message ",
+               print '(" return value from crbmg_c is ",I0,"; message ",
      .          "not written to output")', ierr
             endif
             istop = 4
          endif
-         call crbmg(bufr,mxbufr,nbyt,ierr)
+         call crbmg_c(bufr,mxbufr,nbyt,ierr)
       enddo
       if(ierr.eq.-1) then
          print *,'done'
       elseif(ierr.lt.-1) then
-         print '(" return value from crbmg is -2 - I/O error reading ",
+         print '(" crbmg_c return value is -2 - I/O error reading ",
      .    "input message; message not written to output")'
          istop = 4
       endif
 
 c     Close the input and output files.
 
-      call ccbfl
+      call ccbfl_c
       if(cword.eq.'block') close(51)
  
    88 continue

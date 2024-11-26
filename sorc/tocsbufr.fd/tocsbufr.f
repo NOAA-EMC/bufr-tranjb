@@ -93,6 +93,7 @@ C
       INTEGER         NBUL
       INTEGER         iday,hour
       INTEGER   ::    MAXFILESIZE=1000000
+      INTEGER*4       IREADMG
 C
       CHARACTER * 80  fileo
       CHARACTER * 11  envvar

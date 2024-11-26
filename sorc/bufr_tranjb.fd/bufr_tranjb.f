@@ -425,9 +425,13 @@ C          RSTPROD_BUFR_TANK.TBL file.
 C       2. The main code bufr_tranjb.f has been broken up into 5
 C          separate codes based on subroutine names. They are
 C          openbt.f remap.f remtdy.f and typtim.f
-C       3. Added CALL GET_ENVIRONMENT_VARIABLE('rtank_tbl',RTANK_TBL)
-C          to retrieve the RSTPROD_BUFR_TANK.TBL location from the 
-C          load_dec_env.sh system start-up script.
+C       3. Added setenv("rtank_tbl" in modulefiles/bufrtranjb.lua.tmpl
+C          to retrieve dictionaries/RSTPROD_BUFR_TANK.TBL as the
+C          default restricted tank tbl file to use.
+C 2024-08-15 M. Weiss --
+C       1. Added the statement "use bufr_interface".
+C       2. Changed the call function names COBFL to COBFL_C, 
+C          CRBMG to CRBMG_C, and CCBFL to CCBFL_C.
 C
 C USAGE:
 C   INPUT FILES:
@@ -476,8 +480,8 @@ C       BUFRLIB  - OPENBF   DATELEN  COPYMG   READMG   UFBREP
 C                  UFBINT   OPENMB   UFBCPY   WRITSB   CLOSBF
 C                  IREADSB  NMSUB    MESGBC   MESGBF   WRITCP
 C                  CLOSMG   MAXOUT   STRCPT   IUPVS01  PKVS01
-C                  IGETSC   UFBMEX   READMM   COBFL    CRBMG
-C                  CCBFL    IBFMS    ISETPRM  IGETPRM  SETBMISS
+C                  IGETSC   UFBMEX   READMM   COBFL_C  CRBMG_C
+C                  CCBFL_C  IBFMS    ISETPRM  IGETPRM  SETBMISS
 C                  GETBMISS
 cvvvvv remapping b001/xx102, xx103 -> xx002 workaround (DAK/DCS:11/2016)
 c                  parstr   status
@@ -681,6 +685,8 @@ C   MACHINE:  NCEP WCOSS
 C
 C$$$
       PROGRAM BUFR_TRANJB
+
+      use bufr_interface
  
 C  Parameter NFBFR is maximum # of BUFR "tank" files that can be opened
 C  --------------------------------------------------------------------
@@ -722,6 +728,7 @@ C^^^^^ remapping b002/xx101 ---> b002/xx001                 [CH 11/2019]
       REAL*8        DATES_8(6,20),ALALO_8(2),DOYR_8,GETBMISS
       REAL          RINC(5)
       INTEGER       JDAT(8),KDAT(8),LDAT(8)
+      integer*4     IREADSB,IGETPRM,IBFMS
       LOGICAL       L31_0xx,PRINT_006,PRINT_255,SCRN,PRINT_IT
       LOGICAL       MEMOK
       DATA IEDTN_PREV/99/
@@ -926,7 +933,7 @@ C  -------------------------------------------------------------------
       IF(I.NE.0) GOTO 901
       INQUIRE(INBFR,NAME=FILENAME)
 ccccc PRINT *, FILENAME
-      CALL COBFL(FILENAME,'r')
+      CALL COBFL_C(FILENAME,'r')
 
       CALL SETBMISS(10E8_8)
       print'(1X)'
@@ -935,18 +942,18 @@ ccccc PRINT *, FILENAME
 
     1 CONTINUE
 
-      CALL CRBMG(BMG,MXMB,NMB,IRET)
+      CALL CRBMG_C(BMG,MXMB,NMB,IRET)
       IF(IRET.NE.-1)  THEN  !  Expecting "-1" for end-of-file
         KMSG = KMSG + 1
         IF(IRET.NE.0)THEN
           KMSGbad = KMSGbad + 1
-          PRINT'(/"    *** WARNING: CRBMG had return status ",I0,
+          PRINT'(/"    *** WARNING: CRBMG_C had return status ",I0,
      $      " for msg number ",I0/)',iret,kmsg
         ENDIF
         GO TO 1
       ENDIF
 
-      CALL CCBFL
+      CALL CCBFL_C
       DEALLOCATE(BMG)
 
       PRINT'(/"Input file contains ",I0," messages")',KMSG
@@ -1434,7 +1441,7 @@ cppppp
 cvvvvv remapping b001/xx102, xx103 -> xx002 workaround (DAK/DCS:11/2016)
                   if(tablea.eq.'NC001103') then
                     CALL UFBINT(INBFR,BUYT_8,1,1,NLEV,'BUYT')
-                    if(ibfms(buyt_8).ne.0) cycle
+                    if(IBFMS(buyt_8).ne.0) cycle
                     ibuyt=nint(buyt_8)
 c  remap only TAO/ATLAS/TRITON/PIRATA buoys from b001/xx103 to xx002
                     if(ibuyt.ne.21.and.ibuyt.ne.22) cycle
