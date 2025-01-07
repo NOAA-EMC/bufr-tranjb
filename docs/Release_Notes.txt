@@ -1,64 +1,69 @@
-bufr_tranjb v1.2.0      RELEASED        AUG 15, 2024
-                        IMPLEMENTED     ??? ??, 2024
+bufr_tranjb v1.2.0      RELEASED        JAN 07, 2025
+                        IMPLEMENTED  by FEB 05, 2025 ~18UTC
 
 PRELUDE
-
- Preemtive additions neccessary to be able to compile with BUFRLIB version 12.0.0 
- which also incorporates 4 bit and 8 bit integer processing.
+ Updated to be able to compile/run with NCEPLIB-bufr version 12.0.0 and higher, which incorporates 4 bit and 8 bit integer processing.
+ Do not compile/run with bufr.v11.*.* !!!
 
 FILE CHANGES
-
 M docs/Release_Notes.txt
-M versions/VERSION
-M versions/build.ver
 M dictionaries/rstprod_bufr_tank.tbl
 M modulefiles/bufrtranjb.lua.tmpl
+M sorc/tocsbufr.fd/tocsbufr.f
 M sorc/bufr_tranjb.fd/bufr_tranjb.f
 M sorc/bufr_cword.fd/cword.f
+M sorc/bufr_tranjb.fd/remap.f
+M ush/bufr_tranjb.sh
+M versions/VERSION
+M versions/build.ver
 (M-modified, A-added, D-deleted)
 
 DOCS CHANGES
-
  docs/Release_Notes.txt
- (Additions inserted to reflect code updates)
-
-VERSIONS CHANGES
-
- versions/VERSION and build.ver
- Updated VERSION=1.2.0 and bufr_ver=12.0.0
+ Additions inserted to reflect code updates
 
 DICTIONARIES CHANGES
-
  dictionaries/rstprod_bufr_tank.tbl
- (Eliminated unecessaary b255 restricted tank listings)
-
-SORC CHANGES
-
- sorc/bufr_tranjb.fd/bufr_tranjb.f
- sorc/bufr_cword.fd/cword.f
- Preemtive addition of function call updates required in BUFRLIB 12.0.0
+ Eliminated unnecessary b255 restricted tank listings
 
 MODULEFILES CHANGES
-
  modulefiles/bufrtranjb.lua.tmpl
  Preemtive addition of the evironment variable BUFR_INC4 which points to the location of
  the compiled module "bufr_interface" which has been added to cword.f and bufr_tranjb.f
 
-PRE-IMPLEMENTATION TESTING REQUIREMENTS
+SORC CHANGES
+ sorc/bufr_tranjb.fd/bufr_tranjb.fd
+ sorc/bufr_tranjb.fd/remap.f
+ sorc/bufr_cword.fd/cword.f
+ sorc/tocsbufr.fd/tocsbufr.f
+ Updated function calls required by BUFRLIB 12.0.0
 
+USH CHANGES
+ bufr_tranjb.sh
+ Add comment to clarify the need of default /dictionaries/rstprod_bufr_tank.tbl
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated VERSION=1.2.0
+
+ versions/build.ver
+ Updated bufr_ver=12.0.0
+
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
  satingest needs module bufr_tranjb in order to run
  See docs/README.md for build instructions
  See versions/*.ver for libaries
 
 SPECIAL INSTRUCTIONS
+ NOTE:This update requres synchronised bufr-tranjb.v1.2.0 and satingest v5.0.0  implementation
 
- release/bufr_tranjb.v1.2.0: To enable the bufr_tranjb source code to compile using BUFRLIB version 12.0.0.
- In addition, both 4 bit and 8 bit integer parameters can now be processed
+ release/bufr-tranjb.v1.2.0 enables the bufr_tranjb source code to compile using BUFRLIB version 12.0.0.
+ In addition, both 4 bit and 8 bit integer parameters can now be processed.
  Contact emc.decoders-support@noaa.gov if there are decoder-related questions.
  
  Testing release/bufr_tranjb.v1.2.0 should show no difference in any current satingest processes.
  
-
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.1.0      RELEASED        FEB 23, 2024
                         IMPLEMENTED     ??? ??, 2024
