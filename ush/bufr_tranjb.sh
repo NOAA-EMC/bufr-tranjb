@@ -437,7 +437,7 @@ tank_dir=$1
 bufrfile=$2
 
 #####################################
-### Set up restricted tanks table - Decoders and DF may overwrite
+### Set up restricted tanks table - Decoders and DF may overwrite it # Moved to modulefiles/bufrtranjb.lua.tmpl 
 ######################################
 #export rtank_tbl=${rtank_tbl:-/apps/ops/prod/nco/core/bufr_tranjb.v${bufr_tranjb_ver}/dictionaries/rstprod_bufr_tank.tbl}
 

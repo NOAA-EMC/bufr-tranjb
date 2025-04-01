@@ -25,6 +25,7 @@ C
      $       dattim_8(5,2),obs_repl_8(3,255),obs_repl_out_8(5,255)
       real*8 xtemp_8
       REAL(8) BMISS,GETBMISS,GETVALNB
+      integer*4 ibfms
 
       character*4 borgs(16)
       character*8 crpid,crpid_out,cwmop,cwmop_out,cborg
