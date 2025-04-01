@@ -28,3 +28,6 @@ add_subdirectory(ush)
 
 # Install modulefile for this package.
 add_subdirectory(modulefiles)
+
+# Install dictionary table files
+add_subdirectory(dictionaries)

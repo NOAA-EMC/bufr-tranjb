@@ -1,3 +1,163 @@
+bufr_tranjb v1.1.0      RELEASED        FEB 23, 2024
+                        IMPLEMENTED     ??? ??, 2024
+
+PRELUDE
+
+ Preemtive addition of a BUFR tank restriction table. Simplifies updating a BUFR tank's restriction status.
+
+FILE CHANGES
+
+A dictionaries/
+A dictionaries/CMakeLists.txt
+A dictionaries/rstprod_bufr_tank.tbl
+M CMakeLists.txt
+M docs/Release_Notes.txt
+M versions/VERSION
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M sorc/bufr_tranjb.fd/CMakeLists.txt
+A sorc/bufr_tranjb.fd/bufr_restrict.f
+A sorc/bufr_tranjb.fd/openbt.f
+A sorc/bufr_tranjb.fd/remap.f
+A sorc/bufr_tranjb.fd/remtdy.f
+A sorc/bufr_tranjb.fd/typtim.f
+(M-modified, A-added, D-deleted)
+
+DICTIONARIES (new sub-directory)
+
+ dictionaries/CMakeLists.txt
+ dictionaries/rstprod_bufr_tank.tbl
+ (Added to reflect code updates)
+
+DOCS CHANGES
+
+ docs/Release_Notes.txt
+ (Additions inserted to reflect code updates) 
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Preemtive addition of a BUFR tank restriction table. Simplifies updating a BUFR tank's restriction status.
+
+ sorc/bufr_tranjb.fd/openbt.f
+ sorc/bufr_tranjb.fd/remap.f
+ sorc/bufr_tranjb.fd/remtdy.f
+ sorc/bufr_tranjb.fd/typtim.f
+ Preemtive separation of called subroutines within bufr_tranjb.f. The bufr_tranjb source code is more manageable this way.
+
+VERSIONS CHANGES
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ release/bufr_tranjb.v1.1.0: To simplify updating/testing a BUFR tank's restriction status with out the need to recompile
+ the bufr_tranjb source code. In addition, internal subroutine codes embedded within bufr_tranjb.f were separated into 
+ distinct program files to allow for easiter mananagement of the bufr_tranjb souce code.
+ Contact emc.decoders-support@noaa.gov if there are decoder-related questions.
+ 
+ Testing release/bufr_tranjb.v1.1.0 should show no difference in any current satingest processes.
+ 
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+bufr_tranjb v1.0.5      RELEASED        OCT 26, 2023
+                        IMPLEMENTED     NOV ??, 2023
+
+PRELUDE
+
+ Preemtive tank restriction. Needed for decoder/ingest development (SoFar buoy profiles,b001/xx121) 
+
+FILE CHANGES
+
+M docs/Release_Notes.txt
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+
+ docs/Release_Notes.txt
+ Updated to reflect code changes 
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Preemtive tank restriction. Needed for decoder/ingest development for SoFar buoy profiles, b001/xx121
+
+VERSIONS CHANGES
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ release/bufr_tranjb.v1.0.5 is precipitated by the need to restrict an upcoming new tank.
+ The decoder for that future tank is under development. Testing it will require release/bufr_tranjb.v1.0.5 to be implemented.
+ Contact emc.decoders-support@noaa.gov if  there are decoder-related questions.
+ 
+ Testing release/bufr_tranjb.v1.0.5 should show no difference in any current satingest processes.
+ 
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+bufr_tranjb v1.0.4      RELEASED        AUG ??, 2023
+                        IMPLEMENTED     SEP 20, 2023
+PRELUDE
+
+ Safety check added for ingesting saildrone data.
+
+FILE CHANGES
+
+M docs/README.md
+M docs/Release_Notes.txt
+M sorc/bufr_tranjb.fd/bufr_tranjb.f
+M versions/build.ver
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+
+ docs/README.md
+ Update build instructions
+
+ docs/Release_Notes.txt
+ Updated to reflect changes
+
+SORC CHANGES
+
+ sorc/bufr_tranjb.fd/bufr_tranjb.f
+ Add a safety check for incoming saildrone data's timestamp, skip messages with wrong/missing timestamp
+
+VERSIONS CHANGES
+
+ versions/build.ver
+ Update bufr library version
+
+ versions/VERSION
+ Updated VERSION
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+
+ Implement release/bufr_tranjb.v1.0.4 at the same time (or after) release/satingest.v4.7.0  
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.0.3      RELEASED        SEP 29, 2022
                         IMPLEMENTED     OCT 18, 2022
 PRELUDE
