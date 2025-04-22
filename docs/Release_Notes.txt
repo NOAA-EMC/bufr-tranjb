@@ -1,3 +1,46 @@
+bufr_tranjb v1.2.1      RELEASED        MAY ?? 2025
+                        IMPLEMENTED     MAY ?? 2025 
+
+PRELUDE
+ Addopts /ush/run_apxdx.sh from bufr_util/v1.1.0 
+
+FILE CHANGES
+M docs/Release_Notes.txt
+A ush/run_apxdx.sh
+M modulefiles/bufrtranjb.lua.tmpl
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+ docs/Release_Notes.txt
+ Additions inserted to reflect code updates
+
+MODULEFILES
+ modulefiles/bufrtranjb.lua.tmpl
+ Introduce environment path for $RUN_APXDX
+
+USH CHANGES
+ run_apxdx.sh
+ Addopts /ush/run_apxdx.sh from bufr_util/v1.1.0
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated VERSION=1.2.1
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+ NOTE:
+ release/bufr-tranjb.v1.2.* enable the bufr_tranjb source code to compile using BUFRLIB version 12.0.0.
+ In addition, both 4 bit and 8 bit integer parameters can now be processed.
+ Contact emc.decoders-support@noaa.gov if there are decoder-related questions.
+
+ Testing release/bufr_tranjb.v1.2.1 should show no difference in any current satingest processes.
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 bufr_tranjb v1.2.0      RELEASED        JAN 07, 2025
                         IMPLEMENTED  by FEB 05, 2025 ~18UTC
 
