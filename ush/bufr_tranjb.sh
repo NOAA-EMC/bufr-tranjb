@@ -436,6 +436,9 @@ host=$(hostname -s)
 tank_dir=$1
 bufrfile=$2
 
+
+export MESSAGE_LENGTH=${MESSAGE_LENGTH:-20000}
+
 #####################################
 ### Set up restricted tanks table - Decoders and DF may overwrite it # Moved to modulefiles/bufrtranjb.lua.tmpl 
 ######################################

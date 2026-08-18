@@ -1,6 +1,42 @@
-bufr_tranjb v1.2.1      RELEASED        MAY ?? 2025
-                        IMPLEMENTED     MAY ?? 2025 
+bufr_tranjb v1.2.2      RELEASED        AUG ?? 2026
+                        IMPLEMENTED     SEP ?? 2025
+PRELUDE
+ Increase MESSAGE_LENGTH to ingest datasets with larger messages
 
+FILE CHANGES
+M docs/Release_Notes.txt
+M ush/bufr_tranjb.sh
+M versions/VERSION
+(M-modified, A-added, D-deleted)
+
+DOCS CHANGES
+ docs/Release_Notes.txt
+ Additions inserted to reflect code updates
+
+USH CHANGES
+ bufr_tranjb.sh
+ Increase MESSAGE_LENGTH=20000 to work with datasets with larger messages
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated VERSION=1.2.2
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+ satingest needs module bufr_tranjb in order to run
+ See docs/README.md for build instructions
+ See versions/*.ver for libaries
+
+SPECIAL INSTRUCTIONS
+ NOTE:
+ release/bufr-tranjb.v1.2.* enable the bufr_tranjb source code to compile using BUFRLIB version 12.0.0.
+ In addition, both 4 bit and 8 bit integer parameters can now be processed.
+ Contact emc.decoders-support@noaa.gov if there are decoder-related questions.
+
+ Testing release/bufr_tranjb.v1.2.2 should show no difference in any current satingest processes.
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+bufr_tranjb v1.2.1      RELEASED        MAY ?? 2025
+                        IMPLEMENTED     JUN 12 2025
 PRELUDE
  Addopts /ush/run_apxdx.sh from bufr_util/v1.1.0 
 
